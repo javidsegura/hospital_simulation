@@ -1,6 +1,5 @@
 # BASIC CONFIGURATION
 
-#ERROR: FROOM RED IT DOES NOT RESTART
 
 import simpy as sim
 import numpy as np
@@ -13,12 +12,12 @@ random.seed(2024)
 colorama.init()
 
 #PARAMETERS
-end = 0.0 # Done 
+end = 0.0 
 total_reception_time, total_nurse_time, total_cubicle_time, total_bed_time = 0.0, 0.0, 0.0, 0.0 # Done
 total_reception_queue, total_nurse_queue, total_cubicle_queue, total_bed_queue = 0.0, 0.0, 0.0, 0.0 # Done
-total_time = 0.0 # Done
+total_time = 0.0 
 total_patients_reception, total_patients_nurse, total_patients_cubicle, total_patients_bed = 0,0,0,0 # Done
-last_customer = 0.0 # Done
+last_customer = 0.0 
 total_deceased = 0.0
 total_recovered = 0.0
 recepcionist_bill = 0
@@ -30,7 +29,7 @@ revenue_bill = 0
 
 
 #VARIABLES 
-home_waiting_interval = 30 # 30
+home_waiting_interval = 30 
 mean_recepcionist = 7
 mean_nurse = 25
 mean_cubicle = 60
@@ -181,7 +180,7 @@ def activity(env,patient_id, mean_recepcionist,mean_nurse,
 
 print("\n ------------------- Welcome to the MD Anderson Cancer Center, Austin (TX) ------------------ \n")
 
-with open("/Users/javierdominguezsegura/Academics/College/Courses/SMUC/Topic 3 - DES/Theory/Final_project/md_andersons_results.csv", "w") as file:
+with open("/Users/.../md_andersons_results.csv", "w") as file:
       writer = csv.writer(file, delimiter = ",")
       writer.writerow(["Average reception service time (min)", "Average nurse service time(min)","Average cubicle service time(hours)","Average bed service time(hours)",
                        "Average reception queue time(min)", "Average nurse queue time(min)","Average cubicle queue time(min)","Average bed queue time(min)",
@@ -203,7 +202,7 @@ def run_simulation():
       env.process(generator(env,home_waiting_interval,mean_recepcionist,mean_nurse,
                         mean_cubicle,mean_bed,bed,cubicle,nurse,recepcionist))
       
-      env.run(until = 10080) # 7 days + 1 day (warm-up) - 11520
+      env.run(until = 10080) # 7 days (1 is warm-up) 
 
       recepcionist_bill = total_time * 2.25 * recepcionist.capacity
       nurse_bill = total_time * 3.50 * nurse.capacity
@@ -212,7 +211,7 @@ def run_simulation():
       total_expense = recepcionist_bill + nurse_bill + cubicle_bill + bed_bill
       revenue_bill = last_customer * 7500 
       
-      with open("/Users/javierdominguezsegura/Academics/College/Courses/SMUC/Topic 3 - DES/Theory/Final_project/md_andersons_results.csv", "a") as file:
+      with open("/Users/..../md_andersons_results.csv", "a") as file:
             writer = csv.writer(file, delimiter = ",")
             writer.writerow([round(total_reception_time/total_patients_reception,2) if total_patients_reception != 0 else 0 ,round(total_nurse_time/total_patients_nurse,2) if total_patients_nurse != 0 else 0,
                        round((total_cubicle_time/total_patients_cubicle)/60,2) if total_patients_cubicle != 0 else 0 ,round((total_bed_time/total_patients_bed)/60,2) if total_patients_bed != 0 else 0,
@@ -224,12 +223,12 @@ def run_simulation():
        
 
 for i in range(n_of_runs): # Restart all parameters to 0, in order to avoid overlapping
-      end = 0.0 # Done  
+      end = 0.0 
       total_reception_time, total_nurse_time, total_cubicle_time, total_bed_time = 0.0, 0.0, 0.0, 0.0 # Done
       total_reception_queue, total_nurse_queue, total_cubicle_queue, total_bed_queue = 0.0, 0.0, 0.0, 0.0 # Done
-      total_time = 0.0 # Done
+      total_time = 0.0 
       total_patients_reception, total_patients_nurse, total_patients_cubicle, total_patients_bed = 0,0,0,0 # Done
-      last_customer = 0 # Done
+      last_customer = 0 
       total_deceased = 0.0
       total_recovered = 0.0
       recepcionist_bill = 0
