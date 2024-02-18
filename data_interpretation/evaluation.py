@@ -6,9 +6,9 @@ pd.set_option('display.float_format', '{:.2f}'.format)
 
 df = pd.read_csv('/Users/javierdominguezsegura/Academics/College/Courses/SMUC/Topic 3 - DES/Theory/Final_project/md_andersons_results.csv')
 
-average = df.mean()
+average = df.mean() # Get average outcomes
 
-la = df.describe()
+la = df.describe() # Get descriptive statistics for each variable (column)
 
 print(average ,la)
 
