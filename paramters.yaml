@@ -1,22 +1,77 @@
-
+## NOTES ##
+# 1) Time is measured in minutes
+# 2) Probabilities are in percentage
 
 
 GENERAL_SETTINGS:
   csvFilePath: "data/data.csv"
   numberOfRuns: 1
-  warmUpPeriod: 0
-  totalSimulationTime: 10
+  warmUpPeriod: 0 
+  totalSimulationTime: 1000
 
 RESOURCES_CAPACITY:
-  receptionist: 1
-  nurse: 1
-  doctor: 1
+  receptionist: 2
+  nurse: 3
+  doctor: 8
+
+ARRIVAL: 
+  arrivalRate: 9
 
 RECEPTION:
   receptionistAssesment:
-    critical: .05
-    urgent: .15
-    moderate: .55
-    low: .15
-    non-urgent: .1
+    critical: 5
+    urgent: 15
+    moderate: 55
+    low: 15
+    non-urgent: 10
+  receptionServiceTime:
+    mean: 4
+    std: 1
 
+NURSE:
+  nurseAssesment:
+    moderate:
+      critical: 2
+      urgent: 2.5
+      moderate: 92
+      low: 3
+      non-urgent: .5
+    low:
+      critical: .01
+      urgent: .99
+      moderate: 4
+      low: 90
+      non-urgent: 5
+  nurseServiceTime:
+    critical:
+      mean: 2.1
+      std: 1.5
+    urgent:
+      mean: 2.7
+      std: 1.2
+    moderate:
+      mean: 3.6
+      std: .6
+    low:
+      mean: 4.5
+      std: .9
+
+DOCTOR:
+  doctorAssesment:
+    critical: 100
+    urgent: 95
+    moderate: 45
+    low: 10
+  doctorServiceTime:
+    critical:
+      mean: 7
+      std: 5
+    urgent:
+      mean: 9
+      std: 4
+    moderate:
+      mean: 12
+      std: 2
+    low:
+      mean: 15
+      std: 3

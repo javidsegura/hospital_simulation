@@ -17,29 +17,27 @@ class AuxiliaryFunctions():
             """ Returns the color of the stage """
             self.stageColors = {
                   "reception": colorama.Fore.BLUE,
-                  "nurseWaiting": colorama.Fore.RED,
                   "nurse": colorama.Fore.YELLOW,
-                  "doctorWaiting": colorama.Fore.GREEN,
-                  "doctor": colorama.Fore.MAGENTA
+                  "doctor": colorama.Fore.MAGENTA,
+                  "exit": colorama.Fore.GREEN
             }
 
             self.stageIndentation = {
                   "reception": 1,
-                  "nurseWaiting": 2,
-                  "nurse": 3,
-                  "doctorWaiting": 4,
-                  "doctor": 5
+                  "nurse": 2,
+                  "doctor": 3,
+                  "exit": 4
             }
       
       def eventPrint(self,
                      eventStage: str,
-                     isStart: bool,
+                     justArrived: bool,
                      patient_id: int,
                      time: float,
                      otherInfo: str = None
                      ):
             indentation = "\t" * self.stageIndentation[eventStage]
-            if isStart:
-                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- START {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo}: entered at {round(time,2)} (clock)")
+            if justArrived:
+                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- START {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: entered at {round(time,2)} (clock)")
             else:
-                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- END {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo}: finished at {round(time,2)} (clock)")
+                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- END {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: finished at {round(time,2)} (clock)")
