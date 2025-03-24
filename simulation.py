@@ -58,6 +58,10 @@ class Simulation():
                   "totalUrgentHospitalPatients": 0,
                   "totalModerateHospitalPatients": 0,
                   "totalLowHospitalPatients": 0,
+                  # Financials
+                  "totalFinancials": 0,
+                  "totalEnterHospital": 0,
+                  "totalExitHospital": 0
             }
             self.metrics = {
                   "totalTime": 0,
@@ -75,6 +79,10 @@ class Simulation():
                   # # Doctor metrics
                   # "averageDoctorServiceTime": self.metricsValues["totalDoctorServiceTime"] / self.metricsValues["totalDoctorPatients"],
                   # "proportionDoctorUrgentHospitalization": self.metricsValues["totalDoctorUrgentPatients"] / self.metricsValues["totalDoctorPatients"]
+                  # Financial metrics
+                  "totalFinancials": 0,
+                  "averageRevenuePerPatient": 0,
+                  "hospitalEntryRate": 0
             }
 
       def update_metrics(self):
@@ -90,7 +98,11 @@ class Simulation():
                   self.metrics["proportionModeratePatients"] = self.metricsValues["totalModeratePatients"] / self.metricsValues["totalPatients"]
                   self.metrics["proportionLowPatients"] = self.metricsValues["totalLowPatients"] / self.metricsValues["totalPatients"]
                   self.metrics["proportionNonUrgentPatients"] = self.metricsValues["totalNonUrgentPatients"] / self.metricsValues["totalPatients"]
-                  # Update other calculated metrics here
+                  
+                  # Financial metrics
+                  self.metrics["totalFinancials"] = self.metricsValues["totalFinancials"]
+                  self.metrics["averageRevenuePerPatient"] = self.metricsValues["totalFinancials"] / self.metricsValues["totalPatients"]
+                  self.metrics["hospitalEntryRate"] = self.metricsValues["totalEnterHospital"] / self.metricsValues["totalPatients"]
       
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
@@ -154,12 +166,15 @@ class Simulation():
             
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
+            
+            # Financials
+            self.financials(patient)
 
             self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                  justArrived=False,
                                                  patient_id=patient["id"],
                                                  time=self.env.now,
-                                                 otherInfo=f"{ 'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital' } -- priority: {patient['priority']}")
+                                                 otherInfo=f"{'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital'} -- priority: {patient['priority']} -- Financials: ${self.metricsValues['totalFinancials']}")
       
       def __setUp__(self):
             """Set ups a simulation instance to be ran """
@@ -176,8 +191,15 @@ class Simulation():
             # Update metrics before storing results
             self.update_metrics()
             
+            # Print financial summary
+            print("\n===== FINANCIAL SUMMARY =====")
+            print(f"Total Revenue: ${self.metricsValues['totalFinancials']:.2f}")
+            print(f"Patients Entering Hospital: {self.metricsValues['totalEnterHospital']} ({(self.metricsValues['totalEnterHospital']/self.metricsValues['totalPatients']*100):.1f}%)")
+            print(f"Average Revenue Per Patient: ${(self.metricsValues['totalFinancials']/self.metricsValues['totalPatients']):.2f}")
+            print("============================\n")
+            
             # Storing results
-            print("rrasrasrar", self.metrics)
+            print("Metrics:", self.metrics)
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricValue for metricValue in self.metrics.values()])
@@ -190,6 +212,32 @@ class Simulation():
             numberOfRuns = self.variables["GENERAL_SETTINGS"]["numberOfRuns"]
             for i in range(numberOfRuns):
                   self.__setUp__()
+      
+      
+      ################
+      ## FINANCIALS ##
+      ################
+      
+      def financials(self, patient):
+            """ Calculates the financials of the simulation """
+            
+            # All patients pay the general urgency fee
+            self.metricsValues["totalFinancials"] += self.variables["FEES"]["generalUrgenceFee"]
+            
+            if patient["enterHospital"] == "yes":
+                  # Add the appropriate hospital entry fee based on priority
+                  if patient["priority"] == "critical":
+                        self.metricsValues["totalFinancials"] += self.variables["FEES"]["enterHospitalCritical"]
+                  elif patient["priority"] == "urgent":
+                        self.metricsValues["totalFinancials"] += self.variables["FEES"]["enterHospitalUrgent"]
+                  elif patient["priority"] == "moderate":
+                        self.metricsValues["totalFinancials"] += self.variables["FEES"]["enterHospitalModerate"]
+                  elif patient["priority"] == "low":
+                        self.metricsValues["totalFinancials"] += self.variables["FEES"]["enterHospitalLow"]
+                  
+                  self.metricsValues["totalEnterHospital"] += 1
+            else:
+                  self.metricsValues["totalExitHospital"] += 1
       
       ##########################
       ## ACTIVITY SUBROUTINES ##

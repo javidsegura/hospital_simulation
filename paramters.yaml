@@ -66,3 +66,10 @@ DOCTOR:
       mean: 12
     low:
       mean: 15
+
+FEES:
+  generalUrgenceFee: 150
+  enterHospitalCritical: 1000
+  enterHospitalUrgent: 500
+  enterHospitalModerate: 350
+  enterHospitalLow: 200
