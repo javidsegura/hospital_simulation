@@ -2,9 +2,10 @@
 
 
 ITERATIONS
-- Understand and document code
-- Optimize class based 
-- Integrate new changes
+- Understand and document code  ✅
+- Optimize class based  ✅ 
+- Integrate new changes ✅
+- Take metrics
 - Day vs night approach
 
 

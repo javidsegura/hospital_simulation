@@ -1,6 +1,6 @@
 import random 
 import os
-
+import csv
 import simpy as sim
 import numpy as np
 
@@ -22,8 +22,21 @@ class Simulation():
                   "low": 4,
                   "non-urgent": 5
             }
+            self.__metrics__()
             
             return None
+      
+      def __metrics__(self):
+            """ Initializes metrics """
+            self.metrics = {
+                  "totalReceptionServiceTime": 0,
+                  "totalReceptionPatients": 0,
+                  "totalTime": 0
+            }
+      
+      def __isWarmUpOver__(self):
+            """ Checks if the warm up period is over """
+            return self.env.now > self.variables["GENERAL_SETTINGS"]["warmUpPeriod"]
       
       def __generator__(self):
             """ Generates patients"""
@@ -45,6 +58,8 @@ class Simulation():
                   # Wait for next arrival
                   timeBetweenArrivals = random.expovariate(1/self.variables["ARRIVAL"]["arrivalRate"])
                   yield self.env.timeout(timeBetweenArrivals) # Let other patients arrive
+                  if self.__isWarmUpOver__():
+                        self.metrics["totalTime"] = self.env.now
       
       def __activity__(self, patient):
             """ Simulates activity of the patients """
@@ -92,9 +107,15 @@ class Simulation():
             self.env.run(until = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"])
 
             # Storing results
+            with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
+                  writer = csv.writer(file, delimiter = ",")
+                  writer.writerow([metricValue for metricValue in self.metrics.values()])
 
       def start(self):
             # <<==>> ADD MULTIHIREADING HERE <<==>>
+            with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "w") as file:
+                  writer = csv.writer(file, delimiter = ",")
+                  writer.writerow([metricName for metricName in self.metrics.keys()])
             numberOfRuns = self.variables["GENERAL_SETTINGS"]["numberOfRuns"]
             for i in range(numberOfRuns):
                   self.__setUp__()

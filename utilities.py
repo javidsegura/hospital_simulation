@@ -28,6 +28,13 @@ class AuxiliaryFunctions():
                   "doctor": 3,
                   "exit": 4
             }
+
+            self.stageEmojis = {
+                  "reception": "🏥",
+                  "nurse": "👩‍⚕️",
+                  "doctor": "👨‍⚕️",
+                  "exit": "👋"
+            }
       
       def eventPrint(self,
                      eventStage: str,
@@ -38,6 +45,6 @@ class AuxiliaryFunctions():
                      ):
             indentation = "\t" * self.stageIndentation[eventStage]
             if justArrived:
-                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- START {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: entered at {round(time,2)} (clock)")
+                  print(f"{indentation}{self.stageEmojis[eventStage]} {self.stageColors[eventStage]} PATIENT {patient_id} -- START {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: entered at {round(time,2)} (clock)")
             else:
-                  print(f"{indentation}{self.stageColors[eventStage]} PATIENT {patient_id} -- END {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: finished at {round(time,2)} (clock)")
+                  print(f"{indentation}{self.stageEmojis[eventStage]} {self.stageColors[eventStage]} PATIENT {patient_id} -- END {eventStage}{colorama.Style.RESET_ALL}  -- {otherInfo if otherInfo else ''}: finished at {round(time,2)} (clock)")

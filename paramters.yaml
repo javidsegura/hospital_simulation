@@ -4,7 +4,7 @@
 
 
 GENERAL_SETTINGS:
-  csvFilePath: "data/data.csv"
+  csvFilePath: "results.csv"
   numberOfRuns: 1
   warmUpPeriod: 0 
   totalSimulationTime: 1000
