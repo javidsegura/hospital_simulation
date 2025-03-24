@@ -28,13 +28,71 @@ class Simulation():
       
       def __metrics__(self):
             """ Initializes metrics """
-            self.metrics = {
+            self.metricsValues = {
+                  #General metrics
+                  "totalTime": 0,
+                  "totalPatients": 0,
+                  "totalCriticalPatients": 0,
+                  "totalUrgentPatients": 0,
+                  "totalModeratePatients": 0,
+                  "totalLowPatients": 0,
+                  "totalNonUrgentPatients": 0,
+                  # Arrival metrics
+                  "totalArrivalTime": 0,
+                  # Reception metrics
                   "totalReceptionServiceTime": 0,
-                  "totalReceptionPatients": 0,
-                  "totalTime": 0
+                  # Nurse metrics
+                  "totalNurseServiceTime": 0,
+                  "totalNursePatients": 0,
+                  "totalNurseCriticalServiceTime": 0,
+                  "totalNurseCriticalPatients": 0,
+                  # Doctor metrics
+                  "totalDoctorServiceTime": 0,
+                  "totalDoctorPatients": 0,
+                  "totalDoctorCriticalServiceTime": 0,
+                  "totalDoctorCriticalPatients": 0,
+                  "totalDoctorUrgentPatients": 0,
+                  "totalDoctorModeratePatients": 0,
+                  "totalDoctorLowPatients": 0,
+                  "totalCriticalHospitalPatients": 0,
+                  "totalUrgentHospitalPatients": 0,
+                  "totalModerateHospitalPatients": 0,
+                  "totalLowHospitalPatients": 0,
             }
+            self.metrics = {
+                  "totalTime": 0,
+                  "totalPatients": 0,
+                  "proportionCriticalPatients": 0,
+                  "proportionUrgentPatients": 0,
+                  "proportionModeratePatients": 0,
+                  "proportionLowPatients": 0,
+                  "proportionNonUrgentPatients": 0,
+                  # Reception metrics
+                  # "averageReceptionServiceTime": self.metricsValues["totalReceptionServiceTime"] / self.metricsValues["totalPatients"],
+                  # # Nurse metrics
+                  # "averageNurseServiceTime": self.metricsValues["totalNurseServiceTime"] / self.metricsValues["totalNursePatients"],
+                  # "averageNurseCriticalServiceTime": self.metricsValues["totalNurseCriticalServiceTime"] / self.metricsValues["totalNurseCriticalPatients"],
+                  # # Doctor metrics
+                  # "averageDoctorServiceTime": self.metricsValues["totalDoctorServiceTime"] / self.metricsValues["totalDoctorPatients"],
+                  # "proportionDoctorUrgentHospitalization": self.metricsValues["totalDoctorUrgentPatients"] / self.metricsValues["totalDoctorPatients"]
+            }
+
+      def update_metrics(self):
+            # Only calculate proportions if we have patients
+            if self.metricsValues["totalPatients"] > 0:
+                  # General metrics
+                  self.metrics["totalTime"] = self.metricsValues["totalTime"]
+                  self.metrics["totalPatients"] = self.metricsValues["totalPatients"]
+
+                  # Proportions of patients
+                  self.metrics["proportionCriticalPatients"] = self.metricsValues["totalCriticalPatients"] / self.metricsValues["totalPatients"]
+                  self.metrics["proportionUrgentPatients"] = self.metricsValues["totalUrgentPatients"] / self.metricsValues["totalPatients"]
+                  self.metrics["proportionModeratePatients"] = self.metricsValues["totalModeratePatients"] / self.metricsValues["totalPatients"]
+                  self.metrics["proportionLowPatients"] = self.metricsValues["totalLowPatients"] / self.metricsValues["totalPatients"]
+                  self.metrics["proportionNonUrgentPatients"] = self.metricsValues["totalNonUrgentPatients"] / self.metricsValues["totalPatients"]
+                  # Update other calculated metrics here
       
-      def __isWarmUpOver__(self):
+      def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
             return self.env.now > self.variables["GENERAL_SETTINGS"]["warmUpPeriod"]
       
@@ -58,15 +116,22 @@ class Simulation():
                   # Wait for next arrival
                   timeBetweenArrivals = random.expovariate(1/self.variables["ARRIVAL"]["arrivalRate"])
                   yield self.env.timeout(timeBetweenArrivals) # Let other patients arrive
-                  if self.__isWarmUpOver__():
-                        self.metrics["totalTime"] = self.env.now
+                  if self._isWarmUpOver_():
+                        self.metricsValues["totalTime"] = self.env.now
       
       def __activity__(self, patient):
             """ Simulates activity of the patients """
 
+            if (self._isWarmUpOver_()):
+                  print(f"Patient {patient['id']} arrived at {self.env.now}")
+                  self.metricsValues["totalPatients"] += 1
+                  print(f"Total patients: {self.metricsValues['totalPatients']}")
+
             # 1st Stage: Reception
             yield from self.activity_reception(patient)  # Use yield from to maintain generator
             if (patient["priority"] == "non-urgent"):
+                if (self._isWarmUpOver_()):
+                      self.metricsValues["totalNonUrgentPatients"] += 1
                 self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                  justArrived=False,
                                                  patient_id=patient["id"],
@@ -78,6 +143,8 @@ class Simulation():
             if (patient["priority"] not in ["critical", "urgent"]):
                 yield from self.activity_nurse(patient)
                 if (patient["priority"] == "non-urgent"):
+                    if (self._isWarmUpOver_()):
+                      self.metricsValues["totalNonUrgentPatients"] += 1
                     self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                  justArrived=False,
                                                  patient_id=patient["id"],
@@ -106,7 +173,11 @@ class Simulation():
             self.env.process(self.__generator__())
             self.env.run(until = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"])
 
+            # Update metrics before storing results
+            self.update_metrics()
+            
             # Storing results
+            print("rrasrasrar", self.metrics)
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricValue for metricValue in self.metrics.values()])
@@ -142,6 +213,7 @@ class Simulation():
             # Requesting resource (appending to queue)
             receptioninstRequest = self.receptionist.request()
             yield receptioninstRequest
+
 
             # Service time
             receptionTime = random.expovariate(1/self.variables["RECEPTION"]["receptionServiceTime"]["mean"])
@@ -217,29 +289,38 @@ class Simulation():
                   """Stochastic evaluation following a categorical/discrete-probability distribution"""
                   match (currentPriority):
                         case "critical":
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues["totalCriticalPatients"] += 1
                               enterHospital = {
                                           "yes": self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100,
                                           "no": 1 - self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100
                                     }
                               return np.random.choice(list(enterHospital.keys()), p=list(enterHospital.values()), size=1)[0]
                         case "urgent":
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues["totalUrgentPatients"] += 1
                               enterHospital = {
                                           "yes": self.variables["DOCTOR"]["doctorAssesment"]["urgent"]/100,
                                           "no": 1 - self.variables["DOCTOR"]["doctorAssesment"]["urgent"]/100
                                     }
                               return np.random.choice(list(enterHospital.keys()), p=list(enterHospital.values()), size=1)[0]
                         case "moderate":
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues["totalModeratePatients"] += 1
                               enterHospital = {
                                           "yes": self.variables["DOCTOR"]["doctorAssesment"]["moderate"]/100,
                                           "no": 1 - self.variables["DOCTOR"]["doctorAssesment"]["moderate"]/100
                                     }
                               return np.random.choice(list(enterHospital.keys()), p=list(enterHospital.values()), size=1)[0]
                         case "low":
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues["totalLowPatients"] += 1
                               enterHospital = {
                                           "yes": self.variables["DOCTOR"]["doctorAssesment"]["low"]/100,
                                           "no": 1 - self.variables["DOCTOR"]["doctorAssesment"]["low"]/100
                                     }
                               return np.random.choice(list(enterHospital.keys()), p=list(enterHospital.values()), size=1)[0]
+
 
             self.auxiliaryFunctions.eventPrint(eventStage="doctor",
                                                justArrived=True,

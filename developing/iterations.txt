@@ -7,6 +7,7 @@ ITERATIONS
 - Integrate new changes ✅
 - Take metrics
 - Day vs night approach
+- Finance and optimization 
 
 
 
