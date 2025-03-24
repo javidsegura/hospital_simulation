@@ -26,7 +26,6 @@ RECEPTION:
     non-urgent: 10
   receptionServiceTime:
     mean: 4
-    std: 1
 
 NURSE:
   nurseAssesment:
@@ -45,16 +44,12 @@ NURSE:
   nurseServiceTime:
     critical:
       mean: 2.1
-      std: 1.5
     urgent:
       mean: 2.7
-      std: 1.2
     moderate:
       mean: 3.6
-      std: .6
     low:
       mean: 4.5
-      std: .9
 
 DOCTOR:
   doctorAssesment:
@@ -65,13 +60,9 @@ DOCTOR:
   doctorServiceTime:
     critical:
       mean: 7
-      std: 5
     urgent:
       mean: 9
-      std: 4
     moderate:
       mean: 12
-      std: 2
     low:
       mean: 15
-      std: 3

@@ -27,12 +27,24 @@ class Simulation():
       
       def __generator__(self):
             """ Generates patients"""
-            patient = {"id": 1, "priority": None, "enterHospital": None, "time_in_system": 0}
+            patient_id = 0  # Starting counter
+            
             while True:
+                  patient_id += 1  # Increment ID for each new patient
+                  # Create a new patient object for each process
+                  patient = {
+                        "id": patient_id, 
+                        "priority": None, 
+                        "enterHospital": None, 
+                        "time_in_system": 0
+                  }
+                  
+                  # Start a new process with the fresh patient object
                   self.env.process(self.__activity__(patient))
+                  
+                  # Wait for next arrival
                   timeBetweenArrivals = random.expovariate(1/self.variables["ARRIVAL"]["arrivalRate"])
                   yield self.env.timeout(timeBetweenArrivals) # Let other patients arrive
-                  patient["id"] += 1
       
       def __activity__(self, patient):
             """ Simulates activity of the patients """
@@ -61,6 +73,11 @@ class Simulation():
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
 
+            self.auxiliaryFunctions.eventPrint(eventStage="exit",
+                                                 justArrived=False,
+                                                 patient_id=patient["id"],
+                                                 time=self.env.now,
+                                                 otherInfo=f"{ 'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital' } -- priority: {patient['priority']}")
       
       def __setUp__(self):
             """Set ups a simulation instance to be ran """
@@ -106,7 +123,7 @@ class Simulation():
             yield receptioninstRequest
 
             # Service time
-            receptionTime = random.normalvariate(self.variables["RECEPTION"]["receptionServiceTime"]["mean"], self.variables["RECEPTION"]["receptionServiceTime"]["std"])
+            receptionTime = random.expovariate(1/self.variables["RECEPTION"]["receptionServiceTime"]["mean"])
             yield self.env.timeout(receptionTime)
 
             # Releasing resource
@@ -156,7 +173,7 @@ class Simulation():
             yield nurseRequest
 
             # Service time
-            nurseTime = random.normalvariate(self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"], self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["std"])
+            nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"])
             yield self.env.timeout(nurseTime)
 
             # Releasing resource
@@ -170,7 +187,7 @@ class Simulation():
                                                otherInfo=f"Classified as {patient['priority']}")
 
       def activity_doctor(self, patient):
-            assert patient["priority"] is not None, "Patient priority must be set before calling doctor activity"
+            assert patient["priority"] is not None, f"Patient priority must be set before calling doctor activity, current priority: {patient['priority']}"
             self.auxiliaryFunctions.eventPrint(eventStage="doctor",
                                                justArrived=True,
                                                patient_id=patient["id"],
@@ -216,7 +233,7 @@ class Simulation():
             yield doctorRequest
 
             # Service time
-            doctorTime = random.normalvariate(self.variables["DOCTOR"]["doctorServiceTime"][patient["priority"]]["mean"], self.variables["DOCTOR"]["doctorServiceTime"][patient["priority"]]["std"])
+            doctorTime = random.expovariate(1/self.variables["DOCTOR"]["doctorServiceTime"][patient["priority"]]["mean"])
             yield self.env.timeout(doctorTime)
 
             # Releasing resource
@@ -226,8 +243,7 @@ class Simulation():
             self.auxiliaryFunctions.eventPrint(eventStage="doctor",
                                                justArrived=False,
                                                patient_id=patient["id"],
-                                               time=self.env.now,
-                                               otherInfo=f"{ 'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital' } -- priority: {patient['priority']}")
+                                               time=self.env.now)
 
 if __name__ == "__main__":
       simulation = Simulation()
