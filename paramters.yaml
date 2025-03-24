@@ -73,3 +73,8 @@ FEES:
   enterHospitalUrgent: 500
   enterHospitalModerate: 350
   enterHospitalLow: 200
+
+EXPENSES:
+  nursePerMinute: 0.6
+  doctorPerMinute: 1.5
+  receptionistPerMinute: 0.35

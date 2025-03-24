@@ -82,7 +82,8 @@ class Simulation():
                   # Financial metrics
                   "totalFinancials": 0,
                   "averageRevenuePerPatient": 0,
-                  "hospitalEntryRate": 0
+                  "hospitalEntryRate": 0,
+                  "totalExpenses": 0
             }
 
       def update_metrics(self):
@@ -103,6 +104,7 @@ class Simulation():
                   self.metrics["totalFinancials"] = self.metricsValues["totalFinancials"]
                   self.metrics["averageRevenuePerPatient"] = self.metricsValues["totalFinancials"] / self.metricsValues["totalPatients"]
                   self.metrics["hospitalEntryRate"] = self.metricsValues["totalEnterHospital"] / self.metricsValues["totalPatients"]
+                  self.metrics["totalExpenses"] = self.metricsValues["totalExpenses"]
       
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
@@ -185,17 +187,27 @@ class Simulation():
             self.nurse = sim.PriorityResource(self.env, capacity=self.variables["RESOURCES_CAPACITY"]["nurse"])
             self.doctor = sim.PriorityResource(self.env, capacity=self.variables["RESOURCES_CAPACITY"]["doctor"])
             
+            # Initialize totalExpenses to 0
+            self.metricsValues["totalExpenses"] = 0
+            
             self.env.process(self.__generator__())
             self.env.run(until = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"])
 
+            # Calculate expenses after simulation run
+            self.expenses()
+            
             # Update metrics before storing results
             self.update_metrics()
             
             # Print financial summary
             print("\n===== FINANCIAL SUMMARY =====")
             print(f"Total Revenue: ${self.metricsValues['totalFinancials']:.2f}")
+            print(f"Total Expenses: ${self.metricsValues['totalExpenses']:.2f}")
+            print(f"Total Profit: ${self.metricsValues['totalFinancials'] - self.metricsValues['totalExpenses']:.2f}")
             print(f"Patients Entering Hospital: {self.metricsValues['totalEnterHospital']} ({(self.metricsValues['totalEnterHospital']/self.metricsValues['totalPatients']*100):.1f}%)")
             print(f"Average Revenue Per Patient: ${(self.metricsValues['totalFinancials']/self.metricsValues['totalPatients']):.2f}")
+            print(f"Average Expenses Per Patient: ${(self.metricsValues['totalExpenses']/self.metricsValues['totalPatients']):.2f}")
+            print(f"Average Profit Per Patient: ${(self.metricsValues['totalFinancials'] - self.metricsValues['totalExpenses'])/self.metricsValues['totalPatients']:.2f}")
             print("============================\n")
             
             # Storing results
@@ -239,6 +251,17 @@ class Simulation():
             else:
                   self.metricsValues["totalExitHospital"] += 1
       
+      def expenses(self):
+            """ Calculates the expenses of the simulation """
+            # Receptionist Expenses = simulation time * nº of receptionists * receptionist salary per minute
+            receptionistExpenses = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"] * self.variables["RESOURCES_CAPACITY"]["receptionist"] * self.variables["EXPENSES"]["receptionistPerMinute"]
+            # Nurse Expenses = simulation time * nº of nurses * nurse salary per minute
+            nurseExpenses = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"] * self.variables["RESOURCES_CAPACITY"]["nurse"] * self.variables["EXPENSES"]["nursePerMinute"]
+            # Doctor Expenses = simulation time * nº of doctors * doctor salary per minute
+            doctorExpenses = self.variables["GENERAL_SETTINGS"]["totalSimulationTime"] * self.variables["RESOURCES_CAPACITY"]["doctor"] * self.variables["EXPENSES"]["doctorPerMinute"]
+            
+            self.metricsValues["totalExpenses"] = receptionistExpenses + nurseExpenses + doctorExpenses
+            
       ##########################
       ## ACTIVITY SUBROUTINES ##
       ##########################
