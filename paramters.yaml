@@ -1,0 +1,22 @@
+
+
+
+GENERAL_SETTINGS:
+  csvFilePath: "data/data.csv"
+  numberOfRuns: 1
+  warmUpPeriod: 0
+  totalSimulationTime: 10
+
+RESOURCES_CAPACITY:
+  receptionist: 1
+  nurse: 1
+  doctor: 1
+
+RECEPTION:
+  receptionistAssesment:
+    critical: .05
+    urgent: .15
+    moderate: .55
+    low: .15
+    non-urgent: .1
+

@@ -1,0 +1,16 @@
+
+
+
+ITERATIONS
+- Understand and document code
+- Optimize class based 
+- Integrate new changes
+- Day vs night approach
+
+
+
+
+ADVANCED FEATURES
+- Day and night 
+- Read more about simpy library
+- YAML paramterization
