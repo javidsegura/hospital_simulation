@@ -450,39 +450,21 @@ class Simulation():
             # Update metrics before storing results
             self.update_metrics()
             
-            # Print financial summary
-            print("\n===== FINANCIAL SUMMARY =====")
-            print(f"Total Revenue: ${self.metricsValues['financials_revenue_total']:.2f}")
-            print(f"Total Expenses: ${self.metricsValues['financials_expenses_total']:.2f}")
-            print(f"Total Profit: ${self.metricsValues['financials_revenue_total'] - self.metricsValues['financials_expenses_total']:.2f}")
-            print(f"Patients Entering Hospital: {self.metricsValues['financials_hospital_enterCount']} ({(self.metricsValues['financials_hospital_enterCount']/self.metricsValues['general_totalPatients']*100):.1f}%)")
-            print(f"Average Revenue Per Patient: ${(self.metricsValues['financials_revenue_total']/self.metricsValues['general_totalPatients']):.2f}")
-            print(f"Average Expenses Per Patient: ${(self.metricsValues['financials_expenses_total']/self.metricsValues['general_totalPatients']):.2f}")
-            print(f"Average Profit Per Patient: ${(self.metricsValues['financials_revenue_total'] - self.metricsValues['financials_expenses_total'])/self.metricsValues['general_totalPatients']:.2f}")
-            print("============================\n")
-            
-            # Print patient leaves due to impatience
-            print("\n===== PATIENT SUMMARY =====")
-            print(f"Total patients: {self.metricsValues['general_totalPatients']}")
-            print(f"Patients left due to impatience: {self.metricsValues['proportion_totalPatientsDeclinedAccess']} patients  - ({self.metricsValues['proportion_totalPatientsDeclinedAccess']/self.metricsValues['general_totalPatients']*100:.1f}%)")
-            print("============================\n")
             
             # Storing results
-            print("Metrics:", self.metrics)
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricValue for metricValue in self.metrics.values()])
-                  print(f"LENGTH OF METRICS VALUES: {len(self.metrics.values())} vs header: {len(self.metrics.keys())}")
 
       def start(self):
             # <<==>> ADD MULTIHIREADING HERE <<==>>
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "w") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricName for metricName in self.metrics.keys()])
-                  print(f">>LENGTH OF METRICS VALUES: {len(self.metrics.values())} vs header: {len(self.metrics.keys())}")
             numberOfRuns = self.variables["GENERAL_SETTINGS"]["numberOfRuns"]
             for i in range(numberOfRuns):
                   self.__setUp__()
+                  self.__resetMetrics__()
       
       def getRevenue(self, patient):
             """ Calculates the financials of the simulation """
