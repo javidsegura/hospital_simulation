@@ -7,6 +7,9 @@ import numpy as np
 from utilities import AuxiliaryFunctions
 import yaml
 
+np.random.seed(42)
+random.seed(42)
+
 
 
 class Simulation():
@@ -93,6 +96,7 @@ class Simulation():
                   "doctor_assesment_lowEnterHospitalCount": 0,         
                   # 7. Financials 
                   "financials_revenue_total": 0,
+                  "financials_expenses_total": 0,
                   "financials_hospital_enterCount": 0,
                   "financials_hospital_exitCount": 0         
             }
@@ -452,13 +456,13 @@ class Simulation():
             
             # Print financial summary
             print("\n===== FINANCIAL SUMMARY =====")
-            print(f"Total Revenue: ${self.metricsValues['totalFinancials']:.2f}")
-            print(f"Total Expenses: ${self.metricsValues['totalExpenses']:.2f}")
-            print(f"Total Profit: ${self.metricsValues['totalFinancials'] - self.metricsValues['totalExpenses']:.2f}")
-            print(f"Patients Entering Hospital: {self.metricsValues['totalEnterHospital']} ({(self.metricsValues['totalEnterHospital']/self.metricsValues['general_totalPatients']*100):.1f}%)")
-            print(f"Average Revenue Per Patient: ${(self.metricsValues['totalFinancials']/self.metricsValues['general_totalPatients']):.2f}")
-            print(f"Average Expenses Per Patient: ${(self.metricsValues['totalExpenses']/self.metricsValues['general_totalPatients']):.2f}")
-            print(f"Average Profit Per Patient: ${(self.metricsValues['totalFinancials'] - self.metricsValues['totalExpenses'])/self.metricsValues['general_totalPatients']:.2f}")
+            print(f"Total Revenue: ${self.metricsValues['financials_revenue_total']:.2f}")
+            print(f"Total Expenses: ${self.metricsValues['financials_expenses_total']:.2f}")
+            print(f"Total Profit: ${self.metricsValues['financials_revenue_total'] - self.metricsValues['financials_expenses_total']:.2f}")
+            print(f"Patients Entering Hospital: {self.metricsValues['financials_hospital_enterCount']} ({(self.metricsValues['financials_hospital_enterCount']/self.metricsValues['general_totalPatients']*100):.1f}%)")
+            print(f"Average Revenue Per Patient: ${(self.metricsValues['financials_revenue_total']/self.metricsValues['general_totalPatients']):.2f}")
+            print(f"Average Expenses Per Patient: ${(self.metricsValues['financials_expenses_total']/self.metricsValues['general_totalPatients']):.2f}")
+            print(f"Average Profit Per Patient: ${(self.metricsValues['financials_revenue_total'] - self.metricsValues['financials_expenses_total'])/self.metricsValues['general_totalPatients']:.2f}")
             print("============================\n")
             
             # Print patient leaves due to impatience
@@ -629,8 +633,10 @@ class Simulation():
             startNurseRequestTime = self.env.now
             nurseRequest = self.nurse.request(priority=priority)
             yield nurseRequest
-            if (self._isWarmUpOver_()):
-                  self.metricsValues[f"nurse_totalWaitingInQueueTime{patient['priority'].capitalize()}"] += self.env.now - startNurseRequestTime
+            
+            # Fix the method name - add trailing underscore
+            if self._isWarmUpOver_() and patient["priority"] != "non-urgent":
+                self.metricsValues[f"nurse_totalWaitingInQueueTime{patient['priority'].capitalize()}"] += self.env.now - startNurseRequestTime
 
             # Service time
             startNurseServiceTime = self.env.now
@@ -643,8 +649,10 @@ class Simulation():
                   nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"])
             
             yield self.env.timeout(nurseTime)
-            if (self._isWarmUpOver_()):
-                  self.metricsValues[f"nurse_totalServiceTime{patient['priority'].capitalize()}"] += self.env.now - startNurseServiceTime
+            
+            # Fix the method name here too - add trailing underscore
+            if self._isWarmUpOver_() and patient["priority"] != "non-urgent":
+                self.metricsValues[f"nurse_totalServiceTime{patient['priority'].capitalize()}"] += self.env.now - startNurseServiceTime
 
             # Releasing resource
             if patient["priority"] != "non-urgent":

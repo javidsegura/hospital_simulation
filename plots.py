@@ -27,17 +27,14 @@ def create_plots():
     # 2. Financial Metrics
     create_financial_metrics_plot(df)
     
-    # 3. Waiting Times
-    create_waiting_times_plot(df)
-    
     # 4. Staff Patient Distribution (3 subplots)
     create_staff_patient_distribution_plot(df)
     
     # 5. Service Time Distribution
     create_service_time_plot(df)
     
-    # 6. Nurse Patient Distribution
-    create_nurse_distribution_plot(df)
+    # 6. Queue and Service Time per Staff
+    create_queue_service_time_per_staff_plot(df)
     
     print("All plots have been created and saved to the 'plots' directory.")
 
@@ -50,7 +47,7 @@ def create_patient_distribution_plot(df):
         'Moderate': df['proportion_ModeratePatients'].mean(),
         'Low': df['proportion_LowPatients'].mean(),
         'Non-Urgent': df['proportion_NonUrgentPatients'].mean(),
-        'Declined Access': df['proportion_totalPatientsDeclinedAccess'].mean() / df['general_totalPatients'].mean()
+        'Rejected by System Overload': df['proportion_totalPatientsDeclinedAccess'].mean() / df['general_totalPatients'].mean()
     }
     
     # Create pie chart
@@ -81,9 +78,9 @@ def create_patient_distribution_plot(df):
 def create_financial_metrics_plot(df):
     """Create a bar chart showing financial metrics"""
     # Calculate average values
-    avg_revenue = df['totalFinancials'].mean()
-    avg_expenses = df['totalExpenses'].mean()
-    avg_profit = df['totalProfit'].mean()
+    avg_revenue = df['financials_revenue_total'].mean()
+    avg_expenses = df['financials_expenses_total'].mean()
+    avg_profit = df['financials_profit_total'].mean()
     
     # Create bar chart
     plt.figure(figsize=(10, 6))
@@ -99,7 +96,7 @@ def create_financial_metrics_plot(df):
                 f'${height:.2f}',
                 ha='center', va='bottom', fontsize=12)
     
-    plt.title('Average Financial Performance', fontsize=16)
+    plt.title('Total Financial Performance', fontsize=16)
     plt.ylabel('Amount ($)', fontsize=14)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     
@@ -111,42 +108,6 @@ def create_financial_metrics_plot(df):
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
     
     plt.savefig('plots/financial_metrics.png', dpi=300, bbox_inches='tight')
-    plt.close()
-
-def create_waiting_times_plot(df):
-    """Create a horizontal bar chart comparing different waiting times"""
-    # Calculate average waiting times
-    avg_arrival_wait = df['arrival_waitingTime_average'].mean()
-    avg_reception_wait = df['reception_waitingInQueue_duration_average'].mean()
-    avg_reception_service = df['reception_serviceTime_duration_average'].mean()
-    
-    # Create horizontal bar chart
-    plt.figure(figsize=(12, 6))
-    
-    metrics = ['Arrival Wait Time', 'Reception Queue Wait', 'Reception Service Time']
-    values = [avg_arrival_wait, avg_reception_wait, avg_reception_service]
-    
-    # Sort by duration
-    sorted_indices = np.argsort(values)
-    sorted_metrics = [metrics[i] for i in sorted_indices]
-    sorted_values = [values[i] for i in sorted_indices]
-    
-    # Create horizontal bars with gradient colors
-    bars = plt.barh(sorted_metrics, sorted_values, 
-                   color=sns.color_palette("YlOrRd", len(metrics)))
-    
-    # Add value labels
-    for bar in bars:
-        width = bar.get_width()
-        plt.text(width + 0.5, bar.get_y() + bar.get_height()/2,
-                f'{width:.2f} min', 
-                ha='left', va='center', fontsize=12)
-    
-    plt.title('Average Patient Wait Times', fontsize=16)
-    plt.xlabel('Time (minutes)', fontsize=14)
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-    
-    plt.savefig('plots/waiting_times.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_service_time_plot(df):
@@ -191,33 +152,6 @@ def create_service_time_plot(df):
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
     
     plt.savefig('plots/service_time_distribution.png', dpi=300, bbox_inches='tight')
-    plt.close()
-
-def create_nurse_distribution_plot(df):
-    """Create a pie chart showing nurse patient distribution"""
-    # Calculate average proportions
-    moderate = df['nurse_proportion_moderatePatients'].mean()
-    low = df['nurse_proportion_lowPatients'].mean()
-    
-    # Create pie chart
-    plt.figure(figsize=(10, 6))
-    
-    labels = ['Moderate Priority', 'Low Priority']
-    sizes = [moderate, low]
-    colors = ['#3498db', '#e74c3c']
-    explode = (0.1, 0)  # explode the 1st slice
-    
-    wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=labels,
-                                      autopct='%1.1f%%', startangle=90, colors=colors,
-                                      wedgeprops={'edgecolor': 'w', 'linewidth': 1})
-    
-    # Enhance the appearance
-    plt.setp(autotexts, size=12, weight="bold")
-    plt.setp(texts, size=14)
-    plt.axis('equal')
-    plt.title('Nurse Patient Distribution by Priority', fontsize=16)
-    
-    plt.savefig('plots/nurse_patient_distribution.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_staff_patient_distribution_plot(df):
@@ -319,6 +253,123 @@ def create_staff_patient_distribution_plot(df):
     
     plt.tight_layout()
     plt.savefig('plots/staff_patient_distribution.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+def create_queue_service_time_per_staff_plot(df):
+    """Create a figure with 2 subplots comparing waiting and service times across staff types"""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
+    
+    # 1. Waiting Times Comparison
+    ax1.set_title('Average Waiting Time by Staff Type', fontsize=14)
+    
+    # Calculate average waiting times for each staff type
+    staff_wait_times = {
+        'Doctor': {
+            'Critical': df['doctor_waitingInQueue_duration_critical_average'].mean(),
+            'Urgent': df['doctor_waitingInQueue_duration_urgent_average'].mean(),
+            'Moderate': df['doctor_waitingInQueue_duration_moderate_average'].mean(),
+            'Low': df['doctor_waitingInQueue_duration_low_average'].mean()
+        },
+        'Nurse': {
+            'Moderate': df['nurse_waitingInQueue_duration_moderate_average'].mean(),
+            'Low': df['nurse_waitingInQueue_duration_low_average'].mean()
+        },
+        'Receptionist': {
+            'All Patients': df['reception_waitingInQueue_duration_average'].mean()
+        }
+    }
+    
+    # Calculate overall average for each staff type
+    doctor_avg = sum(staff_wait_times['Doctor'].values()) / len(staff_wait_times['Doctor'])
+    nurse_avg = sum(staff_wait_times['Nurse'].values()) / len(staff_wait_times['Nurse'])
+    reception_avg = staff_wait_times['Receptionist']['All Patients']
+    
+    # Create bar chart
+    staff_types = ['Doctor', 'Nurse', 'Receptionist']
+    wait_times = [doctor_avg, nurse_avg, reception_avg]
+    
+    # Sort by waiting time
+    sorted_indices = np.argsort(wait_times)
+    sorted_staff = [staff_types[i] for i in sorted_indices]
+    sorted_times = [wait_times[i] for i in sorted_indices]
+    
+    bars = ax1.bar(sorted_staff, sorted_times, color=['#3498db', '#2ecc71', '#e74c3c'])
+    
+    # Add value labels
+    for bar in bars:
+        height = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width()/2., height + 5,
+                f'{height:.1f} min', ha='center', va='bottom', fontsize=10)
+    
+    ax1.set_ylabel('Average Wait Time (minutes)', fontsize=12)
+    ax1.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    # Add detailed breakdown as text annotation
+    details = "Breakdown by Priority:\n"
+    details += "Doctor: " + ", ".join([f"{k}: {v:.1f} min" for k, v in staff_wait_times['Doctor'].items()]) + "\n"
+    details += "Nurse: " + ", ".join([f"{k}: {v:.1f} min" for k, v in staff_wait_times['Nurse'].items()])
+    
+    ax1.annotate(details, xy=(0.5, 0.02), xycoords='axes fraction', 
+                ha='center', va='bottom', fontsize=9,
+                bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
+    
+    # 2. Service Times Comparison
+    ax2.set_title('Average Service Time by Staff Type', fontsize=14)
+    
+    # Calculate average service times for each staff type
+    staff_service_times = {
+        'Doctor': {
+            'Critical': df['doctor_serviceTime_duration_critical_average'].mean(),
+            'Urgent': df['doctor_serviceTime_duration_urgent_average'].mean(),
+            'Moderate': df['doctor_serviceTime_duration_moderate_average'].mean(),
+            'Low': df['doctor_serviceTime_duration_low_average'].mean()
+        },
+        'Nurse': {
+            'Moderate': df['nurse_serviceTime_duration_moderate_average'].mean(),
+            'Low': df['nurse_serviceTime_duration_low_average'].mean()
+        },
+        'Receptionist': {
+            'All Patients': df['reception_serviceTime_duration_average'].mean()
+        }
+    }
+    
+    # Calculate overall average for each staff type
+    doctor_service_avg = sum(staff_service_times['Doctor'].values()) / len(staff_service_times['Doctor'])
+    nurse_service_avg = sum(staff_service_times['Nurse'].values()) / len(staff_service_times['Nurse'])
+    reception_service_avg = staff_service_times['Receptionist']['All Patients']
+    
+    # Create bar chart
+    service_times = [doctor_service_avg, nurse_service_avg, reception_service_avg]
+    
+    # Sort by service time
+    sorted_service_indices = np.argsort(service_times)
+    sorted_service_staff = [staff_types[i] for i in sorted_service_indices]
+    sorted_service_times = [service_times[i] for i in sorted_service_indices]
+    
+    bars = ax2.bar(sorted_service_staff, sorted_service_times, color=['#9b59b6', '#f39c12', '#1abc9c'])
+    
+    # Add value labels
+    for bar in bars:
+        height = bar.get_height()
+        ax2.text(bar.get_x() + bar.get_width()/2., height + 0.5,
+                f'{height:.1f} min', ha='center', va='bottom', fontsize=10)
+    
+    ax2.set_ylabel('Average Service Time (minutes)', fontsize=12)
+    ax2.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    # Add detailed breakdown as text annotation
+    service_details = "Breakdown by Priority:\n"
+    service_details += "Doctor: " + ", ".join([f"{k}: {v:.1f} min" for k, v in staff_service_times['Doctor'].items()]) + "\n"
+    service_details += "Nurse: " + ", ".join([f"{k}: {v:.1f} min" for k, v in staff_service_times['Nurse'].items()])
+    
+    ax2.annotate(service_details, xy=(0.5, 0.02), xycoords='axes fraction', 
+                ha='center', va='bottom', fontsize=9,
+                bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
+    
+    plt.suptitle('Staff Efficiency Comparison', fontsize=16, y=0.98)
+    plt.tight_layout()
+    
+    plt.savefig('plots/queue_service_time_per_staff.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 if __name__ == "__main__":
