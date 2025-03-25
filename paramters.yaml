@@ -5,28 +5,28 @@
 
 GENERAL_SETTINGS:
   csvFilePath: "results.csv"
-  numberOfRuns: 3
-  warmUpPeriod: 0 
-  totalPatients: 100
+  numberOfRuns: 2
+  warmUpPeriod: 1000 # 1 day
+  totalSimulationTime: 1000 # 1 day
 
 RESOURCES_CAPACITY:
-  receptionWaitingRoom: 100
+  receptionWaitingRoom: 50
   receptionist: 2
-  nurse: 3
-  doctor: 1
+  nurse: 4
+  doctor: 3
 
 ARRIVAL: 
-  arrivalRate: 2 
+  arrivalRate: 2
 
 RECEPTION:
   receptionistAssesment:
     critical: 5
     urgent: 15
-    moderate: 55
-    low: 15
+    moderate: 50
+    low: 20
     non-urgent: 10
   receptionServiceTime:
-    mean: 10
+    mean: 3
 
 NURSE:
   nurseAssesment:
@@ -56,13 +56,13 @@ DOCTOR:
     low: 10
   doctorServiceTime:
     critical:
-      mean: 20
+      mean: 5
     urgent:
-      mean: 20
+      mean: 7
     moderate:
-      mean: 20
+      mean: 10
     low:
-      mean: 20
+      mean: 15
 
 FINANCIALS:
   FEES:

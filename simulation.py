@@ -317,7 +317,7 @@ class Simulation():
             """ Generates patients"""
             patient_id = 0  # Starting counter
             
-            for i in range(self.variables["GENERAL_SETTINGS"]["totalPatients"]):
+            while True:
                   startGenarationTime = self.env.now
                   patient_id += 1  # Increment ID for each new patient
                   # Create a new patient object for each process
@@ -338,24 +338,8 @@ class Simulation():
                         self.metricsValues["general_totalTime"] = self.env.now
                         self.metricsValues["arrival_totalArrivalTime"] += self.env.now - startGenarationTime
       
-      def checkPatientLeavesDueToWaiting(self, patient, wait_time):
-            # Only apply this rule to non-urgent patients
-            if patient["priority"] != "non-urgent":
-                  return False
-                  
-            # Check if wait time exceeds threshold (30 minutes)
-            if wait_time >= 30:
-                  # 80% chance of leaving (8 out of 10)
-                  if random.random() < 0.8:
-                        if self._isWarmUpOver_():
-                              self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1 # <<<>>> THIS IS WRONG. IT SHOULD BE PEOPLE LEFT. ALSO DONT HARDCODE THE PARAMETERS <<<>>> 
-                        return True
-            
-            return False
-      
       def __activity__(self, patient):
             """ Simulates activity of the patients """
-            arrival_time = self.env.now
             
             if (self._isWarmUpOver_()):
                   self.metricsValues["general_totalPatients"] += 1
@@ -363,32 +347,10 @@ class Simulation():
             # 1st Stage: Reception
             yield from self.activity_reception(patient)  # Use yield from to maintain generator
             
-            # Check if patient leaves due to waiting time after reception
-            current_wait_time = self.env.now - arrival_time
             
-            # Check for impatience after reception (for non-urgent patients)
-            if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
-                  self.auxiliaryFunctions.eventPrint(eventStage="exit",
-                                                   justArrived=False,
-                                                   patient_id=patient["id"],
-                                                   time=self.env.now,
-                                                   otherInfo=f"Patient left due to impatience after waiting {current_wait_time:.1f} minutes (non-urgent)")
-                  return  # Patient leaves the system due to impatience
-            
-            # 2nd Stage: Nurse - All patients go to nurse now, including non-urgent
+            # 2nd Stage: Nurse - All patients that are not critical or urgent go to nurse now, including non-urgent
             if (patient["priority"] not in ["critical", "urgent"]):
-                  # Check if patient leaves due to waiting time before nurse stage
-                  current_wait_time = self.env.now - arrival_time
-                  if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
-                        self.auxiliaryFunctions.eventPrint(eventStage="exit",
-                                                         justArrived=False,
-                                                         patient_id=patient["id"],
-                                                         time=self.env.now,
-                                                         otherInfo=f"Patient left due to impatience after waiting {current_wait_time:.1f} minutes (non-urgent)")
-                        return  # Patient leaves the system due to impatience
-                  
                   yield from self.activity_nurse(patient)
-                  
                   # Non-urgent patients leave after nurse assessment
                   if (patient["priority"] == "non-urgent"):
                         if (self._isWarmUpOver_()):
@@ -399,16 +361,6 @@ class Simulation():
                                                          time=self.env.now,
                                                          otherInfo="Patient exited after nurse assessment due to non-urgent priority")
                         return  # Exit after nurse assessment
-            
-            # Check if patient leaves due to waiting time before doctor stage
-            current_wait_time = self.env.now - arrival_time
-            if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
-                  self.auxiliaryFunctions.eventPrint(eventStage="exit",
-                                                   justArrived=False,
-                                                   patient_id=patient["id"],
-                                                   time=self.env.now,
-                                                   otherInfo=f"Patient left due to impatience after waiting {current_wait_time:.1f} minutes (non-urgent)")
-                  return  # Patient leaves the system due to impatience
             
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
@@ -442,7 +394,7 @@ class Simulation():
             self.metricsValues["totalExpenses"] = 0
             
             self.env.process(self.__generator__())
-            self.env.run()
+            self.env.run(until=self.variables["GENERAL_SETTINGS"]["totalSimulationTime"])
 
             # Calculate expenses
             self.expenses(currentTime = self.env.now)
@@ -525,15 +477,15 @@ class Simulation():
                         "non-urgent": self.variables["RECEPTION"]["receptionistAssesment"]["non-urgent"]/100
                   }
                   return np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
-            self.auxiliaryFunctions.eventPrint(eventStage = "reception",
-                                               justArrived = True,
-                                               patient_id = patient["id"],
-                                               time = self.env.now)
             
             # Requesting resource (appending to queue)
             startReceptionRequestTime = self.env.now
             receptioninstRequest = self.receptionist.request()
             yield receptioninstRequest
+            self.auxiliaryFunctions.eventPrint(eventStage = "reception",
+                                               justArrived = True,
+                                               patient_id = patient["id"],
+                                               time = self.env.now)
             if (self._isWarmUpOver_()):
                   self.metricsValues["reception_totalWaitingInQueueTime"] += self.env.now - startReceptionRequestTime
 
@@ -603,6 +555,7 @@ class Simulation():
             
             # Requesting resource with priority (appending to priority queue)
             startNurseRequestTime = self.env.now
+            
             nurseRequest = self.nurse.request(priority=priority)
             yield nurseRequest
             
