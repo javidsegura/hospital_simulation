@@ -312,6 +312,7 @@ class Simulation():
                         self.metrics["financials_profit_perPatientAverage"] = (self.metricsValues["financials_revenue_total"] - self.metricsValues["financials_expenses_total"]) / self.metricsValues["general_totalPatients"]
                   except Exception as e:
                         print(f"ERROR UPDATING METRICS: {e}")
+      
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
             return self.env.now >= self.variables["GENERAL_SETTINGS"]["warmUpPeriod"]
@@ -471,7 +472,7 @@ class Simulation():
             # Print patient leaves due to impatience
             print("\n===== PATIENT SUMMARY =====")
             print(f"Total patients: {self.metricsValues['general_totalPatients']}")
-            print(f"Patients left due to impatience: {self.metricsValues['proportion_totalPatientsDeclinedAccess']} patients  - ({self.metricsValues['proportion_totalPatientsDeclinedAccess']/self.metricsValues['general_totalPatients']*100:.1f}%)")
+            print(f"Patients left due to impatience: {self.metricsValues['proportion_totalPatientsLeftDueToWaiting']} patients  - ({self.metricsValues['proportion_totalPatientsLeftDueToWaiting']/self.metricsValues['general_totalPatients']*100:.1f}%)")
             print("============================\n")
             
             # Storing results
