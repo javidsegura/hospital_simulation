@@ -489,11 +489,8 @@ class Simulation():
       
       def expenses(self, currentTime):
             """ Calculates the expenses of the simulation """
-            # Receptionist Expenses = simulation time * nº of receptionists * receptionist salary per minute
             receptionistExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["receptionist"] * self.variables["FINANCIALS"]["SALARIES"]["receptionistPerMinute"]
-            # Nurse Expenses = simulation time * nº of nurses * nurse salary per minute
             nurseExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["nurse"] * self.variables["FINANCIALS"]["SALARIES"]["nursePerMinute"]
-            # Doctor Expenses = simulation time * nº of doctors * doctor salary per minute
             doctorExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["doctor"] * self.variables["FINANCIALS"]["SALARIES"]["doctorPerMinute"]
             
             self.metricsValues["financials_expenses_total"] = receptionistExpenses + nurseExpenses + doctorExpenses
