@@ -338,7 +338,7 @@ class Simulation():
                         self.metricsValues["general_totalTime"] = self.env.now
                         self.metricsValues["arrival_totalArrivalTime"] += self.env.now - startGenarationTime
       
-      def check_patient_leaves_due_to_waiting(self, patient, wait_time):
+      def checkPatientLeavesDueToWaiting(self, patient, wait_time):
             # Only apply this rule to non-urgent patients
             if patient["priority"] != "non-urgent":
                   return False
@@ -367,7 +367,7 @@ class Simulation():
             current_wait_time = self.env.now - arrival_time
             
             # Check for impatience after reception (for non-urgent patients)
-            if self.check_patient_leaves_due_to_waiting(patient, current_wait_time):
+            if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
                   self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                    justArrived=False,
                                                    patient_id=patient["id"],
@@ -379,7 +379,7 @@ class Simulation():
             if (patient["priority"] not in ["critical", "urgent"]):
                   # Check if patient leaves due to waiting time before nurse stage
                   current_wait_time = self.env.now - arrival_time
-                  if self.check_patient_leaves_due_to_waiting(patient, current_wait_time):
+                  if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
                         self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                          justArrived=False,
                                                          patient_id=patient["id"],

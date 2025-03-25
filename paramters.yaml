@@ -16,7 +16,7 @@ RESOURCES_CAPACITY:
   doctor: 1
 
 ARRIVAL: 
-  arrivalRate: 2 # <<<>>> HAS TO BE SET TO MINUTES, NOT HOURS <<<>>>
+  arrivalRate: 2 
 
 RECEPTION:
   receptionistAssesment:
