@@ -30,29 +30,33 @@ class Simulation():
       def __metrics__(self):
             """ Initializes metrics """
             self.metricsValues = {
-                  #General metrics
+                  # 1. General metrics
                   "general_totalTime": 0,
                   "general_totalPatients": 0,
+                  # 2. Proportions of patients
                   "proportion_totalCriticalPatients": 0,
                   "proportion_totalUrgentPatients": 0,
                   "proportion_totalModeratePatients": 0,
                   "proportion_totalLowPatients": 0,
                   "proportion_totalNonUrgentPatients": 0,
                   "proportion_totalPatientsDeclinedAccess": 0,
-                  # Arrival metrics
+                  # 3. Arrival metrics
                   "arrival_totalArrivalTime": 0,
-                  # Reception metrics
+                  # 4. Reception metrics
                   "reception_totalServiceTime": 0,
                   "reception_totalWaitingInQueueTime": 0,
-                  # Nurse metrics
+                  # 5. Nurse metrics
+                  # 5.1 Proportions
                   "nurse_totalPatients": 0,
                   "nurse_totalPatientsModerate": 0,
                   "nurse_totalPatientsLow": 0,
+                  # 5.2 Service time
                   "nurse_totalServiceTimeModerate": 0,
                   "nurse_totalServiceTimeLow": 0,
+                  # 5.3 Waiting in queue
                   "nurse_totalWaitingInQueueTimeModerate": 0,
                   "nurse_totalWaitingInQueueTimeLow": 0,
-                  # Doctor metrics
+                  # 6. Doctor metrics
                   "doctor_totalPatients": 0,
                   "reception_totalDoctorPatients": 0,
                   "totalDoctorCriticalServiceTime": 0,
@@ -66,25 +70,42 @@ class Simulation():
                   "totalLowHospitalPatients": 0,
             }
             self.metrics = {
+                  # 1. General metrics
                   "general_totalTime": 0,
                   "general_totalPatients": 0,
+                  # 2. Proportions of patients
                   "proportion_CriticalPatients": 0,
                   "proportion_UrgentPatients": 0,
                   "proportion_ModeratePatients": 0,
                   "proportion_LowPatients": 0,
                   "proportion_NonUrgentPatients": 0,
                   "proportion_totalPatientsDeclinedAccess": 0,
-                  # Arrival metrics
+                  # 3. Arrival metrics
                   "arrival_waitingTime_average": 0,
                   "arrival_waitingTime_total": 0,
-                  # Reception metrics
+                  # 4. Reception metrics
+                  # 4.1 Service time
                   "reception_serviceTime_duration_average": 0,
                   "reception_serviceTime_duration_total": 0,
+                  # 4.2 Waiting in queue
                   "reception_waitingInQueue_duration_average": 0,
                   "reception_waitingInQueue_duration_total": 0,
-                  # Nurse metrics
+                  # 5. Nurse metrics
+                  # 5.1 Proportions
                   "nurse_proportion_moderatePatients": 0,
                   "nurse_proportion_lowPatients": 0,
+                  # 5.2 Service time
+                  "nurse_serviceTime_duration_moderate_average": 0,
+                  "nurse_serviceTime_duration_moderate_total": 0,
+                  "nurse_serviceTime_duration_low_average": 0,
+                  "nurse_serviceTime_duration_low_total": 0,
+                  # 5.3 Waiting in queue
+                  # 5.3.1 Moderate
+                  "nurse_waitingInQueue_duration_moderate_average": 0,
+                  "nurse_waitingInQueue_duration_moderate_total": 0,
+                  # 5.3.2 Low
+                  "nurse_waitingInQueue_duration_low_average": 0,
+                  "nurse_waitingInQueue_duration_low_total": 0,
                   # "averageNurseCriticalServiceTime": self.metricsValues["totalNurseCriticalServiceTime"] / self.metricsValues["totalNurseCriticalPatients"],
                   # # Doctor metrics
                   # "averageDoctorServiceTime": self.metricsValues["totalDoctorServiceTime"] / self.metricsValues["totalDoctorPatients"],
@@ -95,29 +116,45 @@ class Simulation():
       def update_metrics(self):
             # Only calculate proportions if we have patients
             if self.metricsValues["general_totalPatients"] > 0:
-                  # General metrics
+                  # 1. General metrics
                   self.metrics["general_totalTime"] = self.metricsValues["general_totalTime"]
                   self.metrics["general_totalPatients"] = self.metricsValues["general_totalPatients"]
-                  # Proportions of patients
+                  # 2. Proportions of patients
                   self.metrics["proportion_CriticalPatients"] = self.metricsValues["proportion_totalCriticalPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_UrgentPatients"] = self.metricsValues["proportion_totalUrgentPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_ModeratePatients"] = self.metricsValues["proportion_totalModeratePatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_LowPatients"] = self.metricsValues["proportion_totalLowPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_NonUrgentPatients"] = self.metricsValues["proportion_totalNonUrgentPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_totalPatientsDeclinedAccess"] = self.metricsValues["proportion_totalPatientsDeclinedAccess"]
-                  # Arrival
+                  # 3. Arrival
                   self.metrics["arrival_waitingTime_average"] = self.metricsValues["arrival_totalArrivalTime"] / self.metricsValues["general_totalPatients"]
                   self.metrics["arrival_waitingTime_total"] = self.metricsValues["arrival_totalArrivalTime"] 
-                  # Reception
+                  # 4. Reception
+                  # 4.1 Service time
                   self.metrics["reception_serviceTime_duration_average"] = self.metricsValues["reception_totalServiceTime"] / self.metricsValues["general_totalPatients"]
                   self.metrics["reception_serviceTime_duration_total"] = self.metricsValues["reception_totalServiceTime"] 
+                  # 4.2 Waiting in queue
                   self.metrics["reception_waitingInQueue_duration_average"] = self.metricsValues["reception_totalWaitingInQueueTime"] / self.metricsValues["general_totalPatients"]
                   self.metrics["reception_waitingInQueue_duration_total"] = self.metricsValues["reception_totalWaitingInQueueTime"] 
-                  
-                  # Nurse
+                  # 5. Nurse
+                  # 5.1 Proportions
                   self.metrics["nurse_proportion_moderatePatients"] = self.metricsValues["nurse_totalPatientsModerate"] / self.metricsValues["nurse_totalPatients"]
                   self.metrics["nurse_proportion_lowPatients"] = self.metricsValues["nurse_totalPatientsLow"] / self.metricsValues["nurse_totalPatients"]
-      
+                  # 5.2 Service time
+                  # 5.2.1 Moderate
+                  self.metrics["nurse_serviceTime_duration_moderate_average"] = self.metricsValues["nurse_totalServiceTimeModerate"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_serviceTime_duration_moderate_total"] = self.metricsValues["nurse_totalServiceTimeModerate"]
+                  # 5.2.2 Low
+                  self.metrics["nurse_serviceTime_duration_low_average"] = self.metricsValues["nurse_totalServiceTimeLow"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_serviceTime_duration_low_total"] = self.metricsValues["nurse_totalServiceTimeLow"]
+                  # 5.3 Waiting in queue
+                  # 5.3.1 Moderate
+                  self.metrics["nurse_waitingInQueue_duration_moderate_average"] = self.metricsValues["nurse_totalWaitingInQueueTimeModerate"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_waitingInQueue_duration_moderate_total"] = self.metricsValues["nurse_totalWaitingInQueueTimeModerate"]
+                  # 5.3.2 Low
+                  self.metrics["nurse_waitingInQueue_duration_low_average"] = self.metricsValues["nurse_totalWaitingInQueueTimeLow"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_waitingInQueue_duration_low_total"] = self.metricsValues["nurse_totalWaitingInQueueTimeLow"]
+
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
             return self.env.now >= self.variables["GENERAL_SETTINGS"]["warmUpPeriod"]
@@ -317,15 +354,15 @@ class Simulation():
             startNurseRequestTime = self.env.now
             nurseRequest = self.nurse.request(priority=priority)
             yield nurseRequest
-            # if (self._isWarmUpOver_()):
-            #       self.metricsValues["nurse_totalWaitingInQueueTime"] += self.env.now - startNurseRequestTime
+            if (self._isWarmUpOver_()):
+                  self.metricsValues[f"nurse_totalWaitingInQueueTime{patient['priority'].capitalize()}"] += self.env.now - startNurseRequestTime
 
             # Service time
             startNurseServiceTime = self.env.now
             nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"])
             yield self.env.timeout(nurseTime)
-            # if (self._isWarmUpOver_()):
-            #       self.metricsValues["nurse_totalServiceTime"] += self.env.now - startNurseServiceTime
+            if (self._isWarmUpOver_()):
+                  self.metricsValues[f"nurse_totalServiceTime{patient['priority'].capitalize()}"] += self.env.now - startNurseServiceTime
 
             # Releasing resource
             patient["priority"] = nurseEvaluation(patient["priority"])
