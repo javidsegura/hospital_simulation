@@ -4,7 +4,7 @@
 
 
 GENERAL_SETTINGS:
-  csvFilePath: "results.csv"
+  csvFilePath: "other/results.csv"
   numberOfRuns: 10
   warmUpPeriod: 1440 # 1 day
   totalPatients: 10000

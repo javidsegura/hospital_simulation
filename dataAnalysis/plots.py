@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-def load_data(file_path='results.csv'):
+def load_data(file_path='other/results.csv'):
     """Load simulation results from CSV file"""
     return pd.read_csv(file_path)
 
@@ -18,8 +18,8 @@ def create_plots():
     
     # Create output directory if it doesn't exist
     import os
-    if not os.path.exists('plots'):
-        os.makedirs('plots')
+    if not os.path.exists('dataAnalysis/plots'):
+        os.makedirs('dataAnalysis/plots')
     
     # 1. Patient Distribution by Priority
     create_patient_distribution_plot(df)
@@ -72,7 +72,7 @@ def create_patient_distribution_plot(df):
     plt.axis('equal')
     plt.title('Patient Distribution by Priority Level', fontsize=16, pad=20)
     
-    plt.savefig('plots/patient_distribution.png', dpi=300, bbox_inches='tight')
+    plt.savefig('dataAnalysis/plots/patient_distribution.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_financial_metrics_plot(df):
@@ -107,7 +107,7 @@ def create_financial_metrics_plot(df):
                 xycoords='axes fraction',
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
     
-    plt.savefig('plots/financial_metrics.png', dpi=300, bbox_inches='tight')
+    plt.savefig('dataAnalysis/plots/financial_metrics.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_service_time_plot(df):
@@ -151,7 +151,7 @@ def create_service_time_plot(df):
                 ha='center',
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="gray", alpha=0.8))
     
-    plt.savefig('plots/service_time_distribution.png', dpi=300, bbox_inches='tight')
+    plt.savefig('dataAnalysis/plots/service_time_distribution.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_staff_patient_distribution_plot(df):
@@ -252,7 +252,7 @@ def create_staff_patient_distribution_plot(df):
     plt.suptitle('Patient Distribution by Staff Type', fontsize=16, y=1.05)
     
     plt.tight_layout()
-    plt.savefig('plots/staff_patient_distribution.png', dpi=300, bbox_inches='tight')
+    plt.savefig('dataAnalysis/plots/staff_patient_distribution.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_queue_service_time_per_staff_plot(df):
@@ -369,7 +369,7 @@ def create_queue_service_time_per_staff_plot(df):
     plt.suptitle('Staff Efficiency Comparison', fontsize=16, y=0.98)
     plt.tight_layout()
     
-    plt.savefig('plots/queue_service_time_per_staff.png', dpi=300, bbox_inches='tight')
+    plt.savefig('dataAnalysis/plots/queue_service_time_per_staff.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 if __name__ == "__main__":
