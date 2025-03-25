@@ -5,15 +5,9 @@ ITERATIONS
 - Understand and document code  ✅
 - Optimize class based  ✅ 
 - Integrate new changes ✅
-- Max capacity + Abandoning 
+- Max capacity  ✅
+- Abandoning 
 - Finance and optimization 
-- Graph visualization
-- Dont immediately finish
+- Graph visualization 
+- Dont immediately finish ✅
 
-
-
-
-ADVANCED FEATURES
-- Day and night 
-- Detection of bottlenecks
-- Read more about simpy library
