@@ -75,10 +75,13 @@ class Simulation():
                   "proportion_NonUrgentPatients": 0,
                   "proportion_totalPatientsDeclinedAccess": 0,
                   # Arrival metrics
-                  "arrival_averageWaitingTime": 0,
+                  "arrival_waitingTime_average": 0,
+                  "arrival_waitingTime_total": 0,
                   # Reception metrics
-                  "reception_averageServiceTime": 0,
-                  "reception_averageWaitingInQueueTime": 0,
+                  "reception_serviceTime_duration_average": 0,
+                  "reception_serviceTime_duration_total": 0,
+                  "reception_waitingInQueue_duration_average": 0,
+                  "reception_waitingInQueue_duration_total": 0,
                   # Nurse metrics
                   "nurse_proportion_moderatePatients": 0,
                   "nurse_proportion_lowPatients": 0,
@@ -86,6 +89,7 @@ class Simulation():
                   # # Doctor metrics
                   # "averageDoctorServiceTime": self.metricsValues["totalDoctorServiceTime"] / self.metricsValues["totalDoctorPatients"],
                   # "proportionDoctorUrgentHospitalization": self.metricsValues["totalDoctorUrgentPatients"] / self.metricsValues["totalDoctorPatients"]
+            
             }
 
       def update_metrics(self):
@@ -94,7 +98,6 @@ class Simulation():
                   # General metrics
                   self.metrics["general_totalTime"] = self.metricsValues["general_totalTime"]
                   self.metrics["general_totalPatients"] = self.metricsValues["general_totalPatients"]
-
                   # Proportions of patients
                   self.metrics["proportion_CriticalPatients"] = self.metricsValues["proportion_totalCriticalPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_UrgentPatients"] = self.metricsValues["proportion_totalUrgentPatients"] / self.metricsValues["general_totalPatients"]
@@ -103,10 +106,14 @@ class Simulation():
                   self.metrics["proportion_NonUrgentPatients"] = self.metricsValues["proportion_totalNonUrgentPatients"] / self.metricsValues["general_totalPatients"]
                   self.metrics["proportion_totalPatientsDeclinedAccess"] = self.metricsValues["proportion_totalPatientsDeclinedAccess"]
                   # Arrival
-                  self.metrics["arrival_averageWaitingTime"] = self.metricsValues["arrival_totalArrivalTime"] / self.metricsValues["general_totalPatients"]
+                  self.metrics["arrival_waitingTime_average"] = self.metricsValues["arrival_totalArrivalTime"] / self.metricsValues["general_totalPatients"]
+                  self.metrics["arrival_waitingTime_total"] = self.metricsValues["arrival_totalArrivalTime"] 
                   # Reception
-                  self.metrics["reception_averageServiceTime"] = self.metricsValues["reception_totalServiceTime"] / self.metricsValues["general_totalPatients"]
-                  self.metrics["reception_averageWaitingInQueueTime"] = self.metricsValues["reception_totalWaitingInQueueTime"] / self.metricsValues["general_totalPatients"]
+                  self.metrics["reception_serviceTime_duration_average"] = self.metricsValues["reception_totalServiceTime"] / self.metricsValues["general_totalPatients"]
+                  self.metrics["reception_serviceTime_duration_total"] = self.metricsValues["reception_totalServiceTime"] 
+                  self.metrics["reception_waitingInQueue_duration_average"] = self.metricsValues["reception_totalWaitingInQueueTime"] / self.metricsValues["general_totalPatients"]
+                  self.metrics["reception_waitingInQueue_duration_total"] = self.metricsValues["reception_totalWaitingInQueueTime"] 
+                  
                   # Nurse
                   self.metrics["nurse_proportion_moderatePatients"] = self.metricsValues["nurse_totalPatientsModerate"] / self.metricsValues["nurse_totalPatients"]
                   self.metrics["nurse_proportion_lowPatients"] = self.metricsValues["nurse_totalPatientsLow"] / self.metricsValues["nurse_totalPatients"]
