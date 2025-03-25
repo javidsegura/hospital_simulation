@@ -16,6 +16,7 @@ class AuxiliaryFunctions():
       def __stageColors__(self):
             """ Returns the color of the stage """
             self.stageColors = {
+                  "arrival": colorama.Fore.RED,
                   "reception": colorama.Fore.BLUE,
                   "nurse": colorama.Fore.YELLOW,
                   "doctor": colorama.Fore.MAGENTA,
@@ -23,6 +24,7 @@ class AuxiliaryFunctions():
             }
 
             self.stageIndentation = {
+                  "arrival": 0,
                   "reception": 1,
                   "nurse": 2,
                   "doctor": 3,
@@ -30,6 +32,7 @@ class AuxiliaryFunctions():
             }
 
             self.stageEmojis = {
+                  "arrival": "🚶‍♂️",
                   "reception": "🏥",
                   "nurse": "👩‍⚕️",
                   "doctor": "👨‍⚕️",

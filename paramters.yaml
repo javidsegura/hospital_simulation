@@ -10,12 +10,13 @@ GENERAL_SETTINGS:
   totalSimulationTime: 1000
 
 RESOURCES_CAPACITY:
-  receptionist: 2
+  receptionWaitingRoom: 100
+  receptionist: 1
   nurse: 3
   doctor: 8
 
 ARRIVAL: 
-  arrivalRate: 9
+  arrivalRate: 5 # <<<>>> HAS TO BE SET TO MINUTES, NOT HOURS <<<>>>
 
 RECEPTION:
   receptionistAssesment:
@@ -25,7 +26,7 @@ RECEPTION:
     low: 15
     non-urgent: 10
   receptionServiceTime:
-    mean: 4
+    mean: 10
 
 NURSE:
   nurseAssesment:
@@ -42,10 +43,6 @@ NURSE:
       low: 90
       non-urgent: 5
   nurseServiceTime:
-    critical:
-      mean: 2.1
-    urgent:
-      mean: 2.7
     moderate:
       mean: 3.6
     low:

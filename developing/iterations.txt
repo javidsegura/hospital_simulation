@@ -6,8 +6,12 @@ ITERATIONS
 - Optimize class based  ✅ 
 - Integrate new changes ✅
 - Take metrics
-- Day vs night approach
+      - Add length of the queeu distribution
+      - Revaluation distributions
+      - Waiting distributions
+- Max capacity + Abandoning 
 - Finance and optimization 
+- Graph visualization
 
 
 
