@@ -591,12 +591,9 @@ class Simulation():
 
             self.metricsValues["nurse_totalPatients"] += 1
             
-            # Fix for the key error - handle non-urgent priority differently
             if patient["priority"] == "non-urgent":
-                  # Just increment the counter without trying to use the priority as part of the key
-                  pass  # We don't have a specific counter for non-urgent patients in nurse
+                  pass  
             else:
-                  # For other priorities, use the capitalized priority in the key
                   self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1
             
             self.auxiliaryFunctions.eventPrint(eventStage="nurse",
