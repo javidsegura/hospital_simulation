@@ -339,16 +339,6 @@ class Simulation():
                         self.metricsValues["arrival_totalArrivalTime"] += self.env.now - startGenarationTime
       
       def check_patient_leaves_due_to_waiting(self, patient, wait_time):
-            """
-            Checks if a non-urgent patient will leave due to excessive waiting time
-            
-            Args:
-                patient: The patient object
-                wait_time: The time the patient has been waiting in minutes
-                
-            Returns:
-                bool: True if patient leaves, False if patient stays
-            """
             # Only apply this rule to non-urgent patients
             if patient["priority"] != "non-urgent":
                   return False
@@ -358,7 +348,7 @@ class Simulation():
                   # 80% chance of leaving (8 out of 10)
                   if random.random() < 0.8:
                         if self._isWarmUpOver_():
-                              self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1
+                              self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1 # <<<>>> THIS IS WRONG. IT SHOULD BE PEOPLE LEFT. ALSO DONT HARDCODE THE PARAMETERS <<<>>> 
                         return True
             
             return False
@@ -424,7 +414,7 @@ class Simulation():
             yield from self.activity_doctor(patient)
 
             # Calculate financials
-            self.financials(patient)
+            self.getRevenue(patient)
 
             self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                  justArrived=False,
@@ -488,7 +478,7 @@ class Simulation():
             for i in range(numberOfRuns):
                   self.__setUp__()
       
-      def financials(self, patient):
+      def getRevenue(self, patient):
             """ Calculates the financials of the simulation """
 
             # All patients pay the general urgency fee
