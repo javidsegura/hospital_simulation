@@ -47,6 +47,7 @@ def create_patient_distribution_plot(df):
         'Moderate': df['proportion_ModeratePatients'].mean(),
         'Low': df['proportion_LowPatients'].mean(),
         'Non-Urgent': df['proportion_NonUrgentPatients'].mean(),
+        'Left Due to Waiting': df['proportion_totalPatientsLeftDueToWaiting'].mean() / df['general_totalPatients'].mean(),
         'Rejected by System Overload': df['proportion_totalPatientsDeclinedAccess'].mean() / df['general_totalPatients'].mean()
     }
     

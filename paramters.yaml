@@ -75,3 +75,7 @@ FINANCIALS:
     nursePerMinute: 0.6
     doctorPerMinute: 1.5
     receptionistPerMinute: 0.35
+
+PATIENT:
+  patienceTime: 30
+  leaveChance: 0.8

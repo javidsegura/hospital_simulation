@@ -43,6 +43,7 @@ class Simulation():
                   "proportion_totalLowPatients": 0,
                   "proportion_totalNonUrgentPatients": 0,
                   "proportion_totalPatientsDeclinedAccess": 0,
+                  "proportion_totalPatientsLeftDueToWaiting": 0,
                   # 3. Arrival metrics
                   "arrival_totalArrivalTime": 0,
                   # 4. Reception metrics
@@ -111,6 +112,7 @@ class Simulation():
                   "proportion_LowPatients": 0,
                   "proportion_NonUrgentPatients": 0,
                   "proportion_totalPatientsDeclinedAccess": 0,
+                  "proportion_totalPatientsLeftDueToWaiting": 0,
                   # 3. Arrival metrics
                   "arrival_waitingTime_average": 0,
                   "arrival_waitingTime_total": 0,
@@ -215,6 +217,7 @@ class Simulation():
                         self.metrics["proportion_ModeratePatients"] = self.metricsValues["proportion_totalModeratePatients"] / self.metricsValues["general_totalPatients"]
                         self.metrics["proportion_LowPatients"] = self.metricsValues["proportion_totalLowPatients"] / self.metricsValues["general_totalPatients"]
                         self.metrics["proportion_NonUrgentPatients"] = self.metricsValues["proportion_totalNonUrgentPatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_totalPatientsLeftDueToWaiting"] = self.metricsValues["proportion_totalPatientsLeftDueToWaiting"] / self.metricsValues["general_totalPatients"]
                         self.metrics["proportion_totalPatientsDeclinedAccess"] = self.metricsValues["proportion_totalPatientsDeclinedAccess"]
                         # 3. Arrival
                         self.metrics["arrival_waitingTime_average"] = self.metricsValues["arrival_totalArrivalTime"] / self.metricsValues["general_totalPatients"]
@@ -354,11 +357,11 @@ class Simulation():
                   return False
                   
             # Check if wait time exceeds threshold (30 minutes)
-            if wait_time >= 30:
+            if wait_time >= self.variables["PATIENT"]["patienceTime"]:
                   # 80% chance of leaving (8 out of 10)
-                  if random.random() < 0.8:
+                  if random.random() < self.variables["PATIENT"]["leaveChance"]:
                         if self._isWarmUpOver_():
-                              self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1
+                              self.metricsValues["proportion_totalPatientsLeftDueToWaiting"] += 1
                         return True
             
             return False
