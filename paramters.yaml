@@ -5,9 +5,9 @@
 
 GENERAL_SETTINGS:
   csvFilePath: "results.csv"
-  numberOfRuns: 1
-  warmUpPeriod: 0 # 1 day
-  totalPatients: 100000 
+  numberOfRuns: 10
+  warmUpPeriod: 1440 # 1 day
+  totalPatients: 10000
 
 RESOURCES_CAPACITY:
   receptionWaitingRoom: 50

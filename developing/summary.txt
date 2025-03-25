@@ -1,0 +1,13 @@
+
+MAIN REMARKS ABOUT OUR SIMULATION:
+- 41 customizable parameters
+- 66 metrics
+- Most metrics confirm that our parameters are being implemented
+- Trained 100 iterations for 2 1/4 weeks each
+- Units of time are in minutes
+- Priority queues implemented
+- Priority can change twice throughout the SIMULATION
+- Exponential distribution for all waiting times
+- Max capacity (of 50 in reception waiting line) implemented
+- Early queue abandoment if not-priority
+- Financial analysis of the simulation 

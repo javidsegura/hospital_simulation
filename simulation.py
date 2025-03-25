@@ -340,7 +340,6 @@ class Simulation():
             if (self._isWarmUpOver_()):
                   self.metricsValues["general_totalPatients"] += 1
 
-
             # 1st Stage: Reception
             yield from self.activity_reception(patient)  
             if (patient["priority"] == "non-urgent"):
@@ -350,7 +349,7 @@ class Simulation():
                                                          justArrived=False,
                                                          patient_id=patient["id"],
                                                          time=self.env.now,
-                                                         otherInfo="Patient exited after reception due to non-urgent priority")
+                                                         otherInfo="Patient exited after reception due to non-urgent priority at reception")
                   return  # Exit after reception
             
             # 2nd Stage: Nurse - All patients that are not critical or urgent go to nurse now, including non-urgent
@@ -366,12 +365,10 @@ class Simulation():
                                                          time=self.env.now,
                                                          otherInfo="Patient exited after nurse assessment due to non-urgent priority")
                         return  # Exit after nurse assessment
-            print(f"⏩ Patient {patient['id']} with priority {patient['priority']} left nurse stage")
 
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
 
-            
             # Calculate financials
             self.getRevenue(patient)
 
@@ -607,6 +604,7 @@ class Simulation():
                                           True: self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100,
                                           False: 1 - self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100
                                     }
+                              
                               enterHospital = np.random.choice(list(enterHospital.keys()), p=list(enterHospital.values()), size=1)[0]
                               if (self._isWarmUpOver_()):
                                     if (enterHospital):
