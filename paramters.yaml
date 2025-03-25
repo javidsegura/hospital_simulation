@@ -5,9 +5,9 @@
 
 GENERAL_SETTINGS:
   csvFilePath: "results.csv"
-  numberOfRuns: 2
-  warmUpPeriod: 10 # 1 day
-  totalSimulationTime: 1000 # 1 day
+  numberOfRuns: 1
+  warmUpPeriod: 0 # 1 day
+  totalSimulationTime: 100 # 1 day
 
 RESOURCES_CAPACITY:
   receptionWaitingRoom: 50

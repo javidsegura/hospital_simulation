@@ -7,10 +7,6 @@ import numpy as np
 from utilities import AuxiliaryFunctions
 import yaml
 
-np.random.seed(42)
-random.seed(42)
-
-
 
 class Simulation():
       def __init__(self) -> None:
@@ -345,9 +341,17 @@ class Simulation():
                   self.metricsValues["general_totalPatients"] += 1
 
             # 1st Stage: Reception
-            yield from self.activity_reception(patient)  # Use yield from to maintain generator
-            
-            
+            yield from self.activity_reception(patient)  
+            if (patient["priority"] == "non-urgent"):
+                  if (self._isWarmUpOver_()):
+                        self.metricsValues["proportion_totalNonUrgentPatients"] += 1
+                        self.auxiliaryFunctions.eventPrint(eventStage="exit",
+                                                         justArrived=False,
+                                                         patient_id=patient["id"],
+                                                         time=self.env.now,
+                                                         otherInfo="Patient exited after reception due to non-urgent priority")
+                  return  # Exit after reception
+
             # 2nd Stage: Nurse - All patients that are not critical or urgent go to nurse now, including non-urgent
             if (patient["priority"] not in ["critical", "urgent"]):
                   yield from self.activity_nurse(patient)
@@ -365,7 +369,6 @@ class Simulation():
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
 
-            
             # Calculate financials
             self.getRevenue(patient)
 
@@ -408,6 +411,7 @@ class Simulation():
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricValue for metricValue in self.metrics.values()])
+            print(f"Simulation results are {self.metricsValues} completed")
 
       def start(self):
             # <<==>> ADD MULTIHIREADING HERE <<==>>
@@ -478,6 +482,7 @@ class Simulation():
                         "low": self.variables["RECEPTION"]["receptionistAssesment"]["low"]/100,
                         "non-urgent": self.variables["RECEPTION"]["receptionistAssesment"]["non-urgent"]/100
                   }
+                  print(f"Priorities of being low is: {self.variables['RECEPTION']['receptionistAssesment']['low']/100}")
                   return np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
             
             # Requesting resource (appending to queue)
@@ -496,6 +501,7 @@ class Simulation():
             receptionTime = random.expovariate(1/self.variables["RECEPTION"]["receptionServiceTime"]["mean"])
             # Evaluation of the patient: 
             patient["priority"] = receptionEvaluation()
+
             yield self.env.timeout(receptionTime)
             endReceptionServiceTime = self.env.now
             if (self._isWarmUpOver_()):
@@ -535,6 +541,7 @@ class Simulation():
                                           "low": self.variables["NURSE"]["nurseAssesment"]["low"]["low"]/100,
                                           "non-urgent": self.variables["NURSE"]["nurseAssesment"]["low"]["non-urgent"]/100
                                     }
+                              print(f"BY NURSE: Priorities of being low is: {self.variables['NURSE']['nurseAssesment']['low']['low']/100}")
                               newPriority=  np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
                               if (self._isWarmUpOver_()):
                                     self.metricsValues[f"nurse_revaluations_low_to{newPriority.capitalize()}"] += 1
@@ -542,12 +549,7 @@ class Simulation():
 
             if (self._isWarmUpOver_()):
                   self.metricsValues["nurse_totalPatients"] += 1
-            
-            if patient["priority"] == "non-urgent":
-                  pass  
-            else:
-                  if (self._isWarmUpOver_()):
-                        self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1
+                  self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1
             
             self.auxiliaryFunctions.eventPrint(eventStage="nurse",
                                                justArrived=True,
@@ -564,28 +566,19 @@ class Simulation():
             yield nurseRequest
             
             # Fix the method name - add trailing underscore
-            if self._isWarmUpOver_() and patient["priority"] != "non-urgent":
+            if self._isWarmUpOver_():
                 self.metricsValues[f"nurse_totalWaitingInQueueTime{patient['priority'].capitalize()}"] += self.env.now - startNurseRequestTime
 
             # Service time
             startNurseServiceTime = self.env.now
-            
-            # Fix for non-urgent patients - use "low" priority service time as fallback
-            if patient["priority"] == "non-urgent" and "non-urgent" not in self.variables["NURSE"]["nurseServiceTime"]:
-                  # Use "low" priority service time for non-urgent patients
-                  nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"]["low"]["mean"])
-            else:
-                  nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"])
+            nurseTime = random.expovariate(1/self.variables["NURSE"]["nurseServiceTime"][patient["priority"]]["mean"])
             
             yield self.env.timeout(nurseTime)
             
-            # Fix the method name here too - add trailing underscore
-            if self._isWarmUpOver_() and patient["priority"] != "non-urgent":
+            if self._isWarmUpOver_():
                 self.metricsValues[f"nurse_totalServiceTime{patient['priority'].capitalize()}"] += self.env.now - startNurseServiceTime
 
-            # Releasing resource
-            if patient["priority"] != "non-urgent":
-                  patient["priority"] = nurseEvaluation(patient["priority"])
+            patient["priority"] = nurseEvaluation(patient["priority"])
 
             self.nurse.release(nurseRequest)
 
