@@ -92,9 +92,9 @@ class Simulation():
                   "doctor_assesment_moderateEnterHospitalCount": 0,
                   "doctor_assesment_lowEnterHospitalCount": 0,         
                   # 7. Financials 
-                  "totalRevenue": 0,
-                  "totalEnterHospital": 0,
-                  "totalExitHospital": 0         
+                  "financials_revenue_total": 0,
+                  "financials_hospital_enterCount": 0,
+                  "financials_hospital_exitCount": 0         
             }
             self.metrics = {
                   # 1. General metrics
@@ -185,12 +185,17 @@ class Simulation():
                   "doctor_assesment_moderateEnterHospitalRatio": 0,
                   "doctor_assesment_lowEnterHospitalRatio": 0,
                   # 7. Financials
-                  "totalRevenue": 0,
-                  "averageRevenuePerPatient": 0,
-                  "hospitalEntryRate": 0,
-                  "totalExpenses": 0,
-                  "totalProfit": 0,
-                  "averageProfitPerPatient": 0
+                  # 7.0 General
+                  "financials_entryRate": 0,
+                  # 7.1 Revenue
+                  "financials_revenue_total": 0,
+                  "financials_revenue_perPatientAverage": 0,
+                  # 7.2 Expenses
+                  "financials_expenses_total": 0,
+                  "financials_expenses_perPatientAverage": 0,
+                  # 7.3 Profit
+                  "financials_profit_total": 0,
+                  "financials_profit_perPatientAverage": 0
             }
 
       def update_metrics(self):
@@ -250,10 +255,7 @@ class Simulation():
                         self.metrics["nurse_revaluations_low_toNon-urgent"] = self.metricsValues["nurse_revaluations_low_toNon-urgent"] / self.metricsValues["nurse_totalPatientsLow"]
                         # 6. Doctor
                         # 6.1 Proportions
-                        print(f"SELF METRICS VALUES: {self.metricsValues}")
-                        print(f"SELF METRICS VALUES: {self.metrics}")
                         self.metrics["doctor_proportion_totalPatients"] = self.metricsValues["doctor_totalPatients"] 
-                        print(f"SELF METRICS: {self.metrics['doctor_proportion_totalPatients']}")
                         self.metrics["doctor_proportion_criticalPatients"] = self.metricsValues["doctor_totalPatientsCritical"] / self.metricsValues["doctor_totalPatients"]
                         self.metrics["doctor_proportion_urgentPatients"] = self.metricsValues["doctor_totalPatientsUrgent"] / self.metricsValues["doctor_totalPatients"]
                         self.metrics["doctor_proportion_moderatePatients"] = self.metricsValues["doctor_totalPatientsModerate"] / self.metricsValues["doctor_totalPatients"]
@@ -290,12 +292,17 @@ class Simulation():
                         self.metrics["doctor_assesment_moderateEnterHospitalRatio"] = self.metricsValues["doctor_assesment_moderateEnterHospitalCount"] / self.metricsValues["doctor_totalPatientsModerate"]
                         self.metrics["doctor_assesment_lowEnterHospitalRatio"] = self.metricsValues["doctor_assesment_lowEnterHospitalCount"] / self.metricsValues["doctor_totalPatientsLow"]
                         # 7. Financials
-                        self.metrics["totalRevenue"] = self.metricsValues["totalRevenue"]
-                        self.metrics["averageRevenuePerPatient"] = self.metricsValues["totalRevenue"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["hospitalEntryRate"] = self.metricsValues["totalEnterHospital"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["totalExpenses"] = self.metricsValues["totalExpenses"]
-                        self.metrics["totalProfit"] = self.metricsValues["totalRevenue"] - self.metricsValues["totalExpenses"]
-                        self.metrics["averageProfitPerPatient"] = (self.metricsValues["totalRevenue"] - self.metricsValues["totalExpenses"]) / self.metricsValues["general_totalPatients"]
+                        # 7.0 General
+                        self.metrics["financials_entryRate"] = self.metricsValues["financials_hospital_enterCount"] / self.metricsValues["general_totalPatients"]
+                        # 7.1 Revenue
+                        self.metrics["financials_revenue_total"] = self.metricsValues["financials_revenue_total"]
+                        self.metrics["financials_revenue_perPatientAverage"] = self.metricsValues["financials_revenue_total"] / self.metricsValues["general_totalPatients"]
+                        # 7.2 Expenses
+                        self.metrics["financials_expenses_total"] = self.metricsValues["financials_expenses_total"]
+                        self.metrics["financials_expenses_perPatientAverage"] = self.metricsValues["financials_expenses_total"] / self.metricsValues["general_totalPatients"]
+                        # 7.3 Profit
+                        self.metrics["financials_profit_total"] = self.metricsValues["financials_revenue_total"] - self.metricsValues["financials_expenses_total"]
+                        self.metrics["financials_profit_perPatientAverage"] = (self.metricsValues["financials_revenue_total"] - self.metricsValues["financials_expenses_total"]) / self.metricsValues["general_totalPatients"]
                   except Exception as e:
                         print(f"ERROR UPDATING METRICS: {e}")
       def _isWarmUpOver_(self):
@@ -369,7 +376,7 @@ class Simulation():
                                                  patient_id=patient["id"],
                                                  time=self.env.now,
                                                  otherInfo=f"{ 'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital' } -- priority: {patient['priority']}\
-                                                      -- Financials: {self.metricsValues['totalRevenue']}")
+                                                      -- Financials: {self.metricsValues['financials_revenue_total']}")
       
       def __setUp__(self):
             """Set ups a simulation instance to be ran """
@@ -407,35 +414,35 @@ class Simulation():
       
       def financials(self, patient):
             """ Calculates the financials of the simulation """
-            
+
             # All patients pay the general urgency fee
-            self.metricsValues["totalRevenue"] += self.variables["FEES"]["generalUrgenceFee"]
+            self.metricsValues["financials_revenue_total"] += self.variables["FINANCIALS"]["FEES"]["generalUrgenceFee"]
             
             if patient["enterHospital"] == "yes":
                   # Add the appropriate hospital entry fee based on priority
                   if patient["priority"] == "critical":
-                        self.metricsValues["totalRevenue"] += self.variables["FEES"]["enterHospitalCritical"]
+                        self.metricsValues["financials_revenue_total"] += self.variables["FINANCIALS"]["FEES"]["enterHospitalCritical"]
                   elif patient["priority"] == "urgent":
-                        self.metricsValues["totalRevenue"] += self.variables["FEES"]["enterHospitalUrgent"]
+                        self.metricsValues["financials_revenue_total"] += self.variables["FINANCIALS"]["FEES"]["enterHospitalUrgent"]
                   elif patient["priority"] == "moderate":
-                        self.metricsValues["totalRevenue"] += self.variables["FEES"]["enterHospitalModerate"]
+                        self.metricsValues["financials_revenue_total"] += self.variables["FINANCIALS"]["FEES"]["enterHospitalModerate"]
                   elif patient["priority"] == "low":
-                        self.metricsValues["totalRevenue"] += self.variables["FEES"]["enterHospitalLow"]
+                        self.metricsValues["financials_revenue_total"] += self.variables["FINANCIALS"]["FEES"]["enterHospitalLow"]
                   
-                  self.metricsValues["totalEnterHospital"] += 1
+                  self.metricsValues["financials_hospital_enterCount"] += 1
             else:
-                  self.metricsValues["totalExitHospital"] += 1
+                  self.metricsValues["financials_hospital_exitCount"] += 1
       
       def expenses(self, currentTime):
             """ Calculates the expenses of the simulation """
             # Receptionist Expenses = simulation time * nº of receptionists * receptionist salary per minute
-            receptionistExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["receptionist"] * self.variables["EXPENSES"]["receptionistPerMinute"]
+            receptionistExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["receptionist"] * self.variables["FINANCIALS"]["SALARIES"]["receptionistPerMinute"]
             # Nurse Expenses = simulation time * nº of nurses * nurse salary per minute
-            nurseExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["nurse"] * self.variables["EXPENSES"]["nursePerMinute"]
+            nurseExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["nurse"] * self.variables["FINANCIALS"]["SALARIES"]["nursePerMinute"]
             # Doctor Expenses = simulation time * nº of doctors * doctor salary per minute
-            doctorExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["doctor"] * self.variables["EXPENSES"]["doctorPerMinute"]
+            doctorExpenses = currentTime * self.variables["RESOURCES_CAPACITY"]["doctor"] * self.variables["FINANCIALS"]["SALARIES"]["doctorPerMinute"]
             
-            self.metricsValues["totalExpenses"] = receptionistExpenses + nurseExpenses + doctorExpenses
+            self.metricsValues["financials_expenses_total"] = receptionistExpenses + nurseExpenses + doctorExpenses
       
       ##########################
       ## ACTIVITY SUBROUTINES ##

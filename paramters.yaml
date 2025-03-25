@@ -64,14 +64,14 @@ DOCTOR:
     low:
       mean: 20
 
-FEES:
-  generalUrgenceFee: 150
-  enterHospitalCritical: 1000
-  enterHospitalUrgent: 500
-  enterHospitalModerate: 350
-  enterHospitalLow: 200
-
-EXPENSES:
-  nursePerMinute: 0.6
-  doctorPerMinute: 1.5
-  receptionistPerMinute: 0.35
+FINANCIALS:
+  FEES:
+    generalUrgenceFee: 150
+    enterHospitalCritical: 1000
+    enterHospitalUrgent: 500
+    enterHospitalModerate: 350
+    enterHospitalLow: 200
+  SALARIES:
+    nursePerMinute: 0.6
+    doctorPerMinute: 1.5
+    receptionistPerMinute: 0.35
