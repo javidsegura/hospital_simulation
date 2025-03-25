@@ -56,12 +56,31 @@ class Simulation():
                   # 5.3 Waiting in queue
                   "nurse_totalWaitingInQueueTimeModerate": 0,
                   "nurse_totalWaitingInQueueTimeLow": 0,
+                  # 5.4 Revaluations
+                  # 5.4.1 Moderate
+                  "nurse_revaluations_moderate_toCritical": 0,
+                  "nurse_revaluations_moderate_toUrgent": 0,
+                  "nurse_revaluations_moderate_toModerate": 0,
+                  "nurse_revaluations_moderate_toLow": 0,
+                  "nurse_revaluations_moderate_toNon-urgent": 0,
+                  # 5.4.2 Low
+                  "nurse_revaluations_low_toCritical": 0,
+                  "nurse_revaluations_low_toUrgent": 0,
+                  "nurse_revaluations_low_toModerate": 0,
+                  "nurse_revaluations_low_toLow": 0,
+                  "nurse_revaluations_low_toNon-urgent": 0,
                   # 6. Doctor metrics
+                  # 6.1 Proportions
                   "doctor_totalPatients": 0,
-                  "reception_totalDoctorPatients": 0,
-                  "totalDoctorCriticalServiceTime": 0,
-                  "totalDoctorCriticalPatients": 0,
-                  "totalDoctorUrgentPatients": 0,
+                  "doctor_totalPatientsCritical": 0,
+                  "doctor_totalPatientsUrgent": 0,
+                  "doctor_totalPatientsModerate": 0,
+                  "doctor_totalPatientsLow": 0,
+                  # 6.2 Service time
+                  "doctor_totalServiceTimeCritical": 0,
+                  "doctor_totalServiceTimeUrgent": 0,
+                  "doctor_totalServiceTimeModerate": 0,
+                  "doctor_totalServiceTimeLow": 0,
                   "totalDoctorModeratePatients": 0,
                   "totalDoctorLowPatients": 0,
                   "totalCriticalHospitalPatients": 0,
@@ -106,6 +125,20 @@ class Simulation():
                   # 5.3.2 Low
                   "nurse_waitingInQueue_duration_low_average": 0,
                   "nurse_waitingInQueue_duration_low_total": 0,
+                  # 5.4 Revaluations
+                  # 5.4.1 Moderate
+                  "nurse_revaluations_moderate_toCritical": 0,
+                  "nurse_revaluations_moderate_toUrgent": 0,
+                  "nurse_revaluations_moderate_toModerate": 0,
+                  "nurse_revaluations_moderate_toLow": 0,
+                  "nurse_revaluations_moderate_toNon-urgent": 0,
+                  # 5.4.2 Low
+                  "nurse_revaluations_low_toCritical": 0,
+                  "nurse_revaluations_low_toUrgent": 0,
+                  "nurse_revaluations_low_toModerate": 0,
+                  "nurse_revaluations_low_toLow": 0,
+                  "nurse_revaluations_low_toNon-urgent": 0,
+                  
                   # "averageNurseCriticalServiceTime": self.metricsValues["totalNurseCriticalServiceTime"] / self.metricsValues["totalNurseCriticalPatients"],
                   # # Doctor metrics
                   # "averageDoctorServiceTime": self.metricsValues["totalDoctorServiceTime"] / self.metricsValues["totalDoctorPatients"],
@@ -154,6 +187,21 @@ class Simulation():
                   # 5.3.2 Low
                   self.metrics["nurse_waitingInQueue_duration_low_average"] = self.metricsValues["nurse_totalWaitingInQueueTimeLow"] / self.metricsValues["nurse_totalPatientsLow"]
                   self.metrics["nurse_waitingInQueue_duration_low_total"] = self.metricsValues["nurse_totalWaitingInQueueTimeLow"]
+                  # 5.4 Revaluations
+                  # 5.4.1 Moderate
+                  self.metrics["nurse_revaluations_moderate_toCritical"] = self.metricsValues["nurse_revaluations_moderate_toCritical"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_revaluations_moderate_toUrgent"] = self.metricsValues["nurse_revaluations_moderate_toUrgent"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_revaluations_moderate_toModerate"] = self.metricsValues["nurse_revaluations_moderate_toModerate"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_revaluations_moderate_toLow"] = self.metricsValues["nurse_revaluations_moderate_toLow"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  self.metrics["nurse_revaluations_moderate_toNon-urgent"] = self.metricsValues["nurse_revaluations_moderate_toNon-urgent"] / self.metricsValues["nurse_totalPatientsModerate"]
+                  # 5.4.2 Low
+                  self.metrics["nurse_revaluations_low_toCritical"] = self.metricsValues["nurse_revaluations_low_toCritical"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_revaluations_low_toUrgent"] = self.metricsValues["nurse_revaluations_low_toUrgent"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_revaluations_low_toModerate"] = self.metricsValues["nurse_revaluations_low_toModerate"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_revaluations_low_toLow"] = self.metricsValues["nurse_revaluations_low_toLow"] / self.metricsValues["nurse_totalPatientsLow"]
+                  self.metrics["nurse_revaluations_low_toNon-urgent"] = self.metricsValues["nurse_revaluations_low_toNon-urgent"] / self.metricsValues["nurse_totalPatientsLow"]
+                  
+
 
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
@@ -328,7 +376,10 @@ class Simulation():
                                           "low": self.variables["NURSE"]["nurseAssesment"]["moderate"]["low"]/100,
                                           "non-urgent": self.variables["NURSE"]["nurseAssesment"]["moderate"]["non-urgent"]/100
                                     }
-                              return np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
+                              newPriority=  np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues[f"nurse_revaluations_moderate_to{newPriority.capitalize()}"] += 1
+                              return newPriority
                         case "low":
                               priorities = {
                                           "critical": self.variables["NURSE"]["nurseAssesment"]["low"]["critical"]/100,
@@ -337,7 +388,10 @@ class Simulation():
                                           "low": self.variables["NURSE"]["nurseAssesment"]["low"]["low"]/100,
                                           "non-urgent": self.variables["NURSE"]["nurseAssesment"]["low"]["non-urgent"]/100
                                     }
-                              return np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
+                              newPriority=  np.random.choice(list(priorities.keys()), p=list(priorities.values()), size=1)[0]
+                              if (self._isWarmUpOver_()):
+                                    self.metricsValues[f"nurse_revaluations_low_to{newPriority.capitalize()}"] += 1
+                              return newPriority
 
             self.metricsValues["nurse_totalPatients"] += 1
             self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1

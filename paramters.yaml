@@ -7,11 +7,11 @@ GENERAL_SETTINGS:
   csvFilePath: "results.csv"
   numberOfRuns: 1
   warmUpPeriod: 0 
-  totalSimulationTime: 1000
+  totalSimulationTime: 10000
 
 RESOURCES_CAPACITY:
   receptionWaitingRoom: 100
-  receptionist: 1
+  receptionist: 2
   nurse: 3
   doctor: 8
 
