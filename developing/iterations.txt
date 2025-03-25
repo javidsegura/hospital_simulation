@@ -5,13 +5,10 @@ ITERATIONS
 - Understand and document code  ✅
 - Optimize class based  ✅ 
 - Integrate new changes ✅
-- Take metrics
-      - Add length of the queeu distribution
-      - Revaluation distributions
-      - Waiting distributions
 - Max capacity + Abandoning 
 - Finance and optimization 
 - Graph visualization
+- Dont immediately finish
 
 
 
