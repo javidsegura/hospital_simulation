@@ -365,6 +365,7 @@ class Simulation():
             # 3rd Stage: Doctor
             yield from self.activity_doctor(patient)
 
+            
             # Calculate financials
             self.getRevenue(patient)
 
@@ -458,7 +459,8 @@ class Simulation():
                                                time = self.env.now,
                                                otherInfo = "Patient exited prematurely.🚨🚨🚨System is OVERLOADED🚨🚨🚨")
                   patient["priority"] = "non-urgent"
-                  self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1
+                  if (self._isWarmUpOver_()):
+                        self.metricsValues["proportion_totalPatientsDeclinedAccess"] += 1
                   return
             else:
                   self.auxiliaryFunctions.eventPrint(eventStage = "arrival",
@@ -538,12 +540,14 @@ class Simulation():
                                     self.metricsValues[f"nurse_revaluations_low_to{newPriority.capitalize()}"] += 1
                               return newPriority
 
-            self.metricsValues["nurse_totalPatients"] += 1
+            if (self._isWarmUpOver_()):
+                  self.metricsValues["nurse_totalPatients"] += 1
             
             if patient["priority"] == "non-urgent":
                   pass  
             else:
-                  self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1
+                  if (self._isWarmUpOver_()):
+                        self.metricsValues[f"nurse_totalPatients{patient['priority'].capitalize()}"] += 1
             
             self.auxiliaryFunctions.eventPrint(eventStage="nurse",
                                                justArrived=True,

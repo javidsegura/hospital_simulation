@@ -6,7 +6,7 @@
 GENERAL_SETTINGS:
   csvFilePath: "results.csv"
   numberOfRuns: 2
-  warmUpPeriod: 1000 # 1 day
+  warmUpPeriod: 10 # 1 day
   totalSimulationTime: 1000 # 1 day
 
 RESOURCES_CAPACITY:
