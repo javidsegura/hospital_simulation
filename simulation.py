@@ -23,6 +23,7 @@ class Simulation():
                   "non-urgent": 5
             }
             self.__metrics__()
+            self.currentReceptionWaitingRoomCapacity = 0
             
             return None
       
@@ -67,6 +68,8 @@ class Simulation():
                   "proportionModeratePatients": 0,
                   "proportionLowPatients": 0,
                   "proportionNonUrgentPatients": 0,
+                  # Arrival metrics
+                  "averageArrivalTime": 0,
                   # Reception metrics
                   # "averageReceptionServiceTime": self.metricsValues["totalReceptionServiceTime"] / self.metricsValues["totalPatients"],
                   # # Nurse metrics
@@ -109,6 +112,7 @@ class Simulation():
                         "enterHospital": None, 
                         "time_in_system": 0
                   }
+                  self.currentReceptionWaitingRoomCapacity += 1
                   
                   # Start a new process with the fresh patient object
                   self.env.process(self.__activity__(patient))
@@ -123,9 +127,7 @@ class Simulation():
             """ Simulates activity of the patients """
 
             if (self._isWarmUpOver_()):
-                  print(f"Patient {patient['id']} arrived at {self.env.now}")
                   self.metricsValues["totalPatients"] += 1
-                  print(f"Total patients: {self.metricsValues['totalPatients']}")
 
             # 1st Stage: Reception
             yield from self.activity_reception(patient)  # Use yield from to maintain generator
@@ -177,7 +179,6 @@ class Simulation():
             self.update_metrics()
             
             # Storing results
-            print("rrasrasrar", self.metrics)
             with open(self.variables["GENERAL_SETTINGS"]["csvFilePath"], "a") as file:
                   writer = csv.writer(file, delimiter = ",")
                   writer.writerow([metricValue for metricValue in self.metrics.values()])
@@ -195,6 +196,14 @@ class Simulation():
       ## ACTIVITY SUBROUTINES ##
       ##########################
       def activity_reception(self, patient):
+            if (self.currentReceptionWaitingRoomCapacity > self.variables["RESOURCES_CAPACITY"]["receptionWaitingRoom"]):
+                  self.auxiliaryFunctions.eventPrint(eventStage = "reception",
+                                               justArrived = True,
+                                               patient_id = patient["id"],
+                                               time = self.env.now,
+                                               otherInfo = "Patient exited prematurely.🚨🚨🚨System is OVERLOADED🚨🚨🚨")
+                  patient["priority"] = "non-urgent"
+                  return
             def receptionEvaluation():
                   """Stochastic evaluation following a categorical/discrete-probability distribution"""
                   priorities = {
@@ -228,6 +237,7 @@ class Simulation():
                                                patient_id = patient["id"],
                                                time = self.env.now,
                                                otherInfo = f"Classified as {patient['priority']}")
+            self.currentReceptionWaitingRoomCapacity -= 1
       
       def activity_nurse(self, patient):
             assert patient["priority"] is not None, "Patient priority must be set before calling nurse activity"

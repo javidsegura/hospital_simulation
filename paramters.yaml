@@ -7,15 +7,16 @@ GENERAL_SETTINGS:
   csvFilePath: "results.csv"
   numberOfRuns: 1
   warmUpPeriod: 0 
-  totalSimulationTime: 1000
+  totalSimulationTime: 100
 
 RESOURCES_CAPACITY:
-  receptionist: 2
+  receptionWaitingRoom: 1
+  receptionist: 1
   nurse: 3
   doctor: 8
 
 ARRIVAL: 
-  arrivalRate: 9
+  arrivalRate: 9 # <<<>>> HAS TO BE SET TO MINUTES, NOT HOURS <<<>>>
 
 RECEPTION:
   receptionistAssesment:
@@ -25,7 +26,7 @@ RECEPTION:
     low: 15
     non-urgent: 10
   receptionServiceTime:
-    mean: 4
+    mean: 10
 
 NURSE:
   nurseAssesment:
