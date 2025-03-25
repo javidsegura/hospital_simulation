@@ -1,0 +1,1 @@
+doctor_proportion_criticalPatients

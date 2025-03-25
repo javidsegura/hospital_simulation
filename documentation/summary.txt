@@ -11,3 +11,4 @@ MAIN REMARKS ABOUT OUR SIMULATION:
 - Max capacity (of 50 in reception waiting line) implemented
 - Early queue abandoment if not-priority
 - Financial analysis of the simulation 
+- Contains warm-up period

@@ -50,7 +50,7 @@ NURSE:
 
 DOCTOR:
   doctorAssesment:
-    critical: 100
+    critical: 99
     urgent: 95
     moderate: 45
     low: 10

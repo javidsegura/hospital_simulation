@@ -33,12 +33,12 @@ class Simulation():
                   "general_totalTime": 0,
                   "general_totalPatients": 0,
                   # 2. Proportions of patients
-                  "proportion_totalCriticalPatients": 0,
-                  "proportion_totalUrgentPatients": 0,
-                  "proportion_totalModeratePatients": 0,
-                  "proportion_totalLowPatients": 0,
-                  "proportion_totalNonUrgentPatients": 0,
-                  "proportion_totalPatientsDeclinedAccess": 0,
+                  "count_totalCriticalPatients": 0,
+                  "count_totalUrgentPatients": 0,
+                  "count_totalModeratePatients": 0,
+                  "count_totalLowPatients": 0,
+                  "count_totalNonUrgentPatients": 0,
+                  "count_totalPatientsDeclinedAccess": 0,
                   # 3. Arrival metrics
                   "arrival_totalArrivalTime": 0,
                   # 4. Reception metrics
@@ -201,17 +201,16 @@ class Simulation():
       def update_metrics(self):
             # Only calculate proportions if we have patients
             if self.metricsValues["general_totalPatients"] > 0:
-                  try:
                         # 1. General metrics
                         self.metrics["general_totalTime"] = self.metricsValues["general_totalTime"]
                         self.metrics["general_totalPatients"] = self.metricsValues["general_totalPatients"]
                         # 2. Proportions of patients
-                        self.metrics["proportion_CriticalPatients"] = self.metricsValues["proportion_totalCriticalPatients"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["proportion_UrgentPatients"] = self.metricsValues["proportion_totalUrgentPatients"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["proportion_ModeratePatients"] = self.metricsValues["proportion_totalModeratePatients"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["proportion_LowPatients"] = self.metricsValues["proportion_totalLowPatients"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["proportion_NonUrgentPatients"] = self.metricsValues["proportion_totalNonUrgentPatients"] / self.metricsValues["general_totalPatients"]
-                        self.metrics["proportion_totalPatientsDeclinedAccess"] = self.metricsValues["proportion_totalPatientsDeclinedAccess"]
+                        self.metrics["proportion_CriticalPatients"] = self.metricsValues["count_totalCriticalPatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_UrgentPatients"] = self.metricsValues["count_totalUrgentPatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_ModeratePatients"] = self.metricsValues["count_totalModeratePatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_LowPatients"] = self.metricsValues["count_totalLowPatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_NonUrgentPatients"] = self.metricsValues["count_totalNonUrgentPatients"] / self.metricsValues["general_totalPatients"]
+                        self.metrics["proportion_totalPatientsDeclinedAccess"] = self.metricsValues["count_totalPatientsDeclinedAccess"] / self.metricsValues["general_totalPatients"]
                         # 3. Arrival
                         self.metrics["arrival_waitingTime_average"] = self.metricsValues["arrival_totalArrivalTime"] / self.metricsValues["general_totalPatients"]
                         self.metrics["arrival_waitingTime_total"] = self.metricsValues["arrival_totalArrivalTime"] 
@@ -287,6 +286,7 @@ class Simulation():
                         self.metrics["doctor_waitingInQueue_duration_low_average"] = self.metricsValues["doctor_totalWaitingInQueueTimeLow"] / self.metricsValues["doctor_totalPatientsLow"]
                         self.metrics["doctor_waitingInQueue_duration_low_total"] = self.metricsValues["doctor_totalWaitingInQueueTimeLow"]
                         # 6.4 Assesment
+                        assert self.metricsValues["doctor_totalPatientsCritical"] == self.metricsValues["count_totalCriticalPatients"]
                         self.metrics["doctor_assesment_criticalEnterHospitalRatio"] = self.metricsValues["doctor_assesment_criticalEnterHospitalCount"] / self.metricsValues["doctor_totalPatientsCritical"]
                         self.metrics["doctor_assesment_urgentEnterHospitalRatio"] = self.metricsValues["doctor_assesment_urgentEnterHospitalCount"] / self.metricsValues["doctor_totalPatientsUrgent"]
                         self.metrics["doctor_assesment_moderateEnterHospitalRatio"] = self.metricsValues["doctor_assesment_moderateEnterHospitalCount"] / self.metricsValues["doctor_totalPatientsModerate"]
@@ -303,8 +303,7 @@ class Simulation():
                         # 7.3 Profit
                         self.metrics["financials_profit_total"] = self.metricsValues["financials_revenue_total"] - self.metricsValues["financials_expenses_total"]
                         self.metrics["financials_profit_perPatientAverage"] = (self.metricsValues["financials_revenue_total"] - self.metricsValues["financials_expenses_total"]) / self.metricsValues["general_totalPatients"]
-                  except Exception as e:
-                        print(f"ERROR UPDATING METRICS: {e}")
+
       def _isWarmUpOver_(self):
             """ Checks if the warm up period is over """
             return self.env.now >= self.variables["GENERAL_SETTINGS"]["warmUpPeriod"]
@@ -344,7 +343,7 @@ class Simulation():
             yield from self.activity_reception(patient)  
             if (patient["priority"] == "non-urgent"):
                   if (self._isWarmUpOver_()):
-                        self.metricsValues["proportion_totalNonUrgentPatients"] += 1
+                        self.metricsValues["count_totalNonUrgentPatients"] += 1
                         self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                          justArrived=False,
                                                          patient_id=patient["id"],
@@ -358,7 +357,7 @@ class Simulation():
                   # Non-urgent patients leave after nurse assessment
                   if (patient["priority"] == "non-urgent"):
                         if (self._isWarmUpOver_()):
-                              self.metricsValues["proportion_totalNonUrgentPatients"] += 1
+                              self.metricsValues["count_totalNonUrgentPatients"] += 1
                         self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                          justArrived=False,
                                                          patient_id=patient["id"],
@@ -393,9 +392,6 @@ class Simulation():
             self.receptionist = sim.Resource(self.env, capacity=self.variables["RESOURCES_CAPACITY"]["receptionist"])
             self.nurse = sim.PriorityResource(self.env, capacity=self.variables["RESOURCES_CAPACITY"]["nurse"])
             self.doctor = sim.PriorityResource(self.env, capacity=self.variables["RESOURCES_CAPACITY"]["doctor"])
-            
-            # Initialize totalExpenses to 0
-            self.metricsValues["totalExpenses"] = 0
             
             self.env.process(self.__generator__())
             self.env.run()
@@ -598,8 +594,6 @@ class Simulation():
                   """Stochastic evaluation following a categorical/discrete-probability distribution"""
                   match (currentPriority):
                         case "critical":
-                              if (self._isWarmUpOver_()):
-                                    self.metricsValues["proportion_totalCriticalPatients"] += 1
                               enterHospital = {
                                           True: self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100,
                                           False: 1 - self.variables["DOCTOR"]["doctorAssesment"]["critical"]/100
@@ -611,8 +605,6 @@ class Simulation():
                                           self.metricsValues["doctor_assesment_criticalEnterHospitalCount"] += 1
                               return enterHospital
                         case "urgent":
-                              if (self._isWarmUpOver_()):
-                                    self.metricsValues["proportion_totalUrgentPatients"] += 1
                               enterHospital = {
                                           True: self.variables["DOCTOR"]["doctorAssesment"]["urgent"]/100,
                                           False: 1 - self.variables["DOCTOR"]["doctorAssesment"]["urgent"]/100
@@ -623,8 +615,6 @@ class Simulation():
                                           self.metricsValues["doctor_assesment_urgentEnterHospitalCount"] += 1
                               return enterHospital
                         case "moderate":
-                              if (self._isWarmUpOver_()):
-                                    self.metricsValues["proportion_totalModeratePatients"] += 1
                               enterHospital = {
                                           True: self.variables["DOCTOR"]["doctorAssesment"]["moderate"]/100,
                                           False: 1 - self.variables["DOCTOR"]["doctorAssesment"]["moderate"]/100
@@ -635,8 +625,6 @@ class Simulation():
                                           self.metricsValues["doctor_assesment_moderateEnterHospitalCount"] += 1
                               return enterHospital
                         case "low":
-                              if (self._isWarmUpOver_()):
-                                    self.metricsValues["proportion_totalLowPatients"] += 1
                               enterHospital = {
                                           True: self.variables["DOCTOR"]["doctorAssesment"]["low"]/100,
                                           False: 1 - self.variables["DOCTOR"]["doctorAssesment"]["low"]/100
@@ -646,8 +634,10 @@ class Simulation():
                                     if (enterHospital):
                                           self.metricsValues["doctor_assesment_lowEnterHospitalCount"] += 1
                               return enterHospital
-            self.metricsValues["doctor_totalPatients"] += 1
-            self.metricsValues[f"doctor_totalPatients{patient['priority'].capitalize()}"] += 1
+            if (self._isWarmUpOver_()):
+                  self.metricsValues["doctor_totalPatients"] += 1
+                  self.metricsValues[f"doctor_totalPatients{patient['priority'].capitalize()}"] += 1
+                  self.metricsValues[f"count_total{patient['priority'].capitalize()}Patients"] += 1
             self.auxiliaryFunctions.eventPrint(eventStage="doctor",
                                                justArrived=True,
                                                patient_id=patient["id"],
