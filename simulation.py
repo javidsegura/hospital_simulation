@@ -402,7 +402,7 @@ class Simulation():
             
             # Check if patient leaves due to waiting time before doctor stage
             current_wait_time = self.env.now - arrival_time
-            if self.check_patient_leaves_due_to_waiting(patient, current_wait_time):
+            if self.checkPatientLeavesDueToWaiting(patient, current_wait_time):
                   self.auxiliaryFunctions.eventPrint(eventStage="exit",
                                                    justArrived=False,
                                                    patient_id=patient["id"],
@@ -423,6 +423,12 @@ class Simulation():
                                                  otherInfo=f"{ 'entering hospital' if patient['enterHospital'] == 'yes' else 'not entering hospital' } -- priority: {patient['priority']}\
                                                       -- Financials: {self.metricsValues['financials_revenue_total']}")
       
+      def __resetMetrics__(self):
+            for metric in self.metricsValues:
+                  self.metricsValues[metric] = 0
+            for metric in self.metrics:
+                  self.metrics[metric] = 0
+
       def __setUp__(self):
             """Set ups a simulation instance to be ran """
             self.env = sim.Environment()
