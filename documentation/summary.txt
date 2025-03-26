@@ -12,3 +12,4 @@ MAIN REMARKS ABOUT OUR SIMULATION:
 - Early queue abandoment if not-priority
 - Financial analysis of the simulation 
 - Contains warm-up period
+

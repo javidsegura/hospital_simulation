@@ -13,7 +13,7 @@ RESOURCES_CAPACITY:
   receptionWaitingRoom: 50
   receptionist: 2
   nurse: 4
-  doctor: 3
+  doctor: 6
 
 ARRIVAL: 
   arrivalRate: 2
@@ -62,7 +62,7 @@ DOCTOR:
     moderate:
       mean: 10
     low:
-      mean: 15
+      mean: 10
 
 FINANCIALS:
   FEES:
