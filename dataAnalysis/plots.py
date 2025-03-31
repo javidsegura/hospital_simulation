@@ -262,7 +262,7 @@ def create_queue_service_time_per_staff_plot(df):
     # 1. Waiting Times Comparison
     ax1.set_title('Average Waiting Time by Staff Type', fontsize=14)
     
-    # Calculate average waiting times for each staff type
+    # Calculate average waiting times for each staff type - using the correct columns
     staff_wait_times = {
         'Doctor': {
             'Critical': df['doctor_waitingInQueue_duration_critical_average'].mean(),
@@ -279,9 +279,47 @@ def create_queue_service_time_per_staff_plot(df):
         }
     }
     
-    # Calculate overall average for each staff type
-    doctor_avg = sum(staff_wait_times['Doctor'].values()) / len(staff_wait_times['Doctor'])
-    nurse_avg = sum(staff_wait_times['Nurse'].values()) / len(staff_wait_times['Nurse'])
+    # Calculate weighted average for each staff type based on patient distribution
+    # For doctor
+    critical_prop = df['proportion_CriticalPatients'].mean()
+    urgent_prop = df['proportion_UrgentPatients'].mean()
+    moderate_prop = df['proportion_ModeratePatients'].mean()
+    low_prop = df['proportion_LowPatients'].mean()
+    
+    # Normalize proportions for doctor patients
+    doctor_total_prop = critical_prop + urgent_prop + moderate_prop + low_prop
+    critical_norm = critical_prop / doctor_total_prop
+    urgent_norm = urgent_prop / doctor_total_prop
+    moderate_norm = moderate_prop / doctor_total_prop
+    low_norm = low_prop / doctor_total_prop
+    
+    # Calculate weighted average for doctor
+    doctor_avg = (
+        staff_wait_times['Doctor']['Critical'] * critical_norm +
+        staff_wait_times['Doctor']['Urgent'] * urgent_norm +
+        staff_wait_times['Doctor']['Moderate'] * moderate_norm +
+        staff_wait_times['Doctor']['Low'] * low_norm
+    )
+    
+    # For nurse - only moderate and low patients
+    nurse_moderate_prop = df['nurse_proportion_moderatePatients'].mean()
+    nurse_low_prop = df['nurse_proportion_lowPatients'].mean()
+    
+    # Normalize proportions for nurse patients
+    nurse_total_prop = nurse_moderate_prop + nurse_low_prop
+    if nurse_total_prop > 0:  # Avoid division by zero
+        nurse_moderate_norm = nurse_moderate_prop / nurse_total_prop
+        nurse_low_norm = nurse_low_prop / nurse_total_prop
+        
+        # Calculate weighted average for nurse
+        nurse_avg = (
+            staff_wait_times['Nurse']['Moderate'] * nurse_moderate_norm +
+            staff_wait_times['Nurse']['Low'] * nurse_low_norm
+        )
+    else:
+        nurse_avg = 0
+    
+    # For receptionist - already have the average
     reception_avg = staff_wait_times['Receptionist']['All Patients']
     
     # Create bar chart
@@ -298,7 +336,7 @@ def create_queue_service_time_per_staff_plot(df):
     # Add value labels
     for bar in bars:
         height = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width()/2., height + 5,
+        ax1.text(bar.get_x() + bar.get_width()/2., height + 0.5,
                 f'{height:.1f} min', ha='center', va='bottom', fontsize=10)
     
     ax1.set_ylabel('Average Wait Time (minutes)', fontsize=12)
@@ -333,9 +371,22 @@ def create_queue_service_time_per_staff_plot(df):
         }
     }
     
-    # Calculate overall average for each staff type
-    doctor_service_avg = sum(staff_service_times['Doctor'].values()) / len(staff_service_times['Doctor'])
-    nurse_service_avg = sum(staff_service_times['Nurse'].values()) / len(staff_service_times['Nurse'])
+    # Calculate weighted average for service times using the same weights as for waiting times
+    doctor_service_avg = (
+        staff_service_times['Doctor']['Critical'] * critical_norm +
+        staff_service_times['Doctor']['Urgent'] * urgent_norm +
+        staff_service_times['Doctor']['Moderate'] * moderate_norm +
+        staff_service_times['Doctor']['Low'] * low_norm
+    )
+    
+    if nurse_total_prop > 0:
+        nurse_service_avg = (
+            staff_service_times['Nurse']['Moderate'] * nurse_moderate_norm +
+            staff_service_times['Nurse']['Low'] * nurse_low_norm
+        )
+    else:
+        nurse_service_avg = 0
+        
     reception_service_avg = staff_service_times['Receptionist']['All Patients']
     
     # Create bar chart
